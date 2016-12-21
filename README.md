@@ -1,5 +1,5 @@
 # mgw7510-web
-This project is used to offer a web tool for both developer and tester in Nokia SBC department.
+This project is used to offer a web tool for easy utilities for both developer and tester in Nokia SBC department. 
 
 The function of the web tool including but not limited to:
 
