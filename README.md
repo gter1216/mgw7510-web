@@ -17,9 +17,9 @@ User Administration function is finished, including:
    4. session and cookies based on user
 
 ####################   ROAD MAP  ##############################
-Currently, deployment for CE is under developing by Xu Xiao.
-           deployment for HE is under developing by Zhao Peng.
-           DIF tool improvement is under developing by Ling Yan.
+1. Auto deployment for CE is under developing by Xu Xiao.
+2. Auto deployment for HE is under developing by Zhao Peng.
+3. DIF tool improvement is under developing by Ling Yan.
 
 #################### JOIN US ##############################
 If you want to join in our project, please contact me: 
