@@ -1,0 +1,1 @@
+send_mail('hi','fuck you','no-reply@sbc.nokia.com',['Xiao.A.Xu@alcatel-sbell.com.cn']);

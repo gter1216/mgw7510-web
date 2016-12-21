@@ -1,0 +1,4 @@
+DEBUG 2016-12-19 17:56:55,185 ./mgw7510/views.py views.py views index 16: This is an debug message by xuxiao: web user request home page
+DEBUG 2016-12-19 17:57:05,795 ./mgw7510/views.py views.py views signup 31: The sign up form is posted to django
+DEBUG 2016-12-19 17:57:08,892 ./mgw7510/views.py views.py views index 16: This is an debug message by xuxiao: web user request home page
+DEBUG 2016-12-19 17:58:47,026 ./mgw7510/views.py views.py views index 16: This is an debug message by xuxiao: web user request home page
