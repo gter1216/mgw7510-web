@@ -4,7 +4,10 @@ from mgw7510.forms import WebUserForm
 from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
+from django.conf import settings
+import os
 import logging
+
 
 logger = logging.getLogger("django")
 
@@ -87,96 +90,33 @@ def signup(request):
     if request.method == 'POST':
         logger.debug("The sign up form is posted to django")
 
-        # it will print at uwsgi log
-        print "The sign up form is posted to django"
+        hp_uname = request.POST['username']
+        hp_passwd = request.POST['password']
+        hp_cpasswd = request.POST['confirmPassword']
 
-        wuf = WebUserForm(request.POST)
+        if (hp_passwd != hp_cpasswd):
+            return HttpResponse('password not same, please check')
 
-        if wuf.is_valid():
-            print "form is valid"
+        # database query,
+        userExist = WebUser.objects.filter(username__exact=hp_uname)
 
-            # get data form post
-            cleanData = wuf.cleaned_data
-            hp_uname = cleanData['username']
-            hp_passwd = cleanData['password']
-            hp_cpasswd = cleanData['confirmPassword']
-
-            if (hp_passwd != hp_cpasswd):
-                return HttpResponse('password not same, please check')
-
-            # database query,
-            userExist = WebUser.objects.filter(username__exact=hp_uname)
-
-            if userExist:
-                return HttpResponse('user exists, please change to another username')
-            else:
-                # commit data form browser to the database
-                wuf.save()
-                # >> > b = Blog(name='Beatles Blog', tagline='All the latest Beatles news.')
-                # >> > b.save()
-
-                # set cookie; write username into cookie, valid timer is 3600s
-                request.session['username'] = hp_uname
-                # request.set_cookie('username', username, 3600)
-                return HttpResponse('ok')
-
-            # wuf_info = wuf.save()
-            # wuf_info.save()
-
-            # save data to the database
-
-
-            # user = auth.authenticate(email=emal,password=password)
-            #
-            # if user is not None and user.is_active
-            #     auth.login(request,user)
-            #     return
-
-            # commit data form browser to the database
-            # webUserForm.save()
-
+        if userExist:
+            return HttpResponse('user exists, please change to another username')
         else:
-            print "form is invalid"
-            return HttpResponse('input is not valid')
+            # set cookie; write username into cookie, valid timer is 3600s
+            request.session['username'] = hp_uname
+            # request.set_cookie('username', username, 3600)
 
-        # # parse json data
-        # rec_data = json.loads(request.body)
-        #
-        # print rec_data
-        #
-        # username = rec_data['username']
-        # email = rec_data['email']
-        # password = rec_data['password']
-        # confirmPassword = rec_data['confirmPassword']
-        #
-        # #logger.debug(json_data)
-        # #logger.debug('user name: %s'%username)
-        # logger.debug("user name: %s, email: %s, password: %s"%(username,emial,password))
-        #
-        # if form.is_valid():
-        #     return HttpResponse('ok')
-        # else:
-        #     return HttpResponse('failed')
+            # create directory per user
+            user_work_dir = hp_uname.replace("@","_")
+            user_work_dir = user_work_dir.replace(".", "_")
+            user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
+            os.mkdir(user_work_dir)
 
-
-# sign up register form,  get form data by "POST"
-
-# from django import forms
-# from django.http import HttpResponse
-#
-# class UserForm(forms.Form):
-#     name = form.CharField()
-#
-# def signup(req):
-#     if req.method == 'POST':
-#         form = UserForm(req.POST)
-#         if form.is_valid():
-#             print form.cleaned_data
-#             return HttpResponse('ok')
-#     else:
-#         form = UserForm()
-#     return render_to_response('register.html',{'form':form})
-
+            WebUser.objects.create(username=hp_uname,
+                                   password=hp_passwd,
+                                   userWorkDir=user_work_dir)
+            return HttpResponse('ok')
 
 def loginIn(request, loginParam):
     print loginParam
@@ -268,12 +208,15 @@ def ceDeploy(request):
 
 # ce deploy process function
 def ceCheckPak(request):
-
     if request.method == 'POST':
-        print "debug"
-        print request.body
-        print "debug 1111"
-        print request.POST
+        # request.POST ====> <QueryDict: {u'selectPak': [u'none']}>
+        # request.body ====> selectPak=none
+
+        if request.POST.has_key('selectPak'):
+            if request.POST['selectPak'] == 'none':
+                print "ok"
+                # query the ngnsvr11 to get package list and return it with JSON format
+
 
 
 

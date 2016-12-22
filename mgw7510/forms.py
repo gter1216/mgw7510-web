@@ -13,6 +13,7 @@ class WebUserForm(ModelForm):
     confirmPassword = forms.CharField(required=False)
     newPassword = forms.CharField(required=False)
     confirmNewPassword = forms.CharField(required=False)
+    userWorkDir = forms.CharField(required=False)
 
     class Meta:
         model = WebUser  # inherit form WebUser
