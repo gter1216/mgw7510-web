@@ -3,4 +3,4 @@
 *.log
 *.pid
 /.idea/
-*.db
+mgw7510.db
