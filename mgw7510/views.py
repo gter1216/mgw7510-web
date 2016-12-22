@@ -256,6 +256,26 @@ def forgetPasswd(request):
     else:
         return HttpResponse('not post method')
 
+# request an home page for ce deploy
+def ceDeploy(request):
+
+    # if user logged
+    uname = request.session.get('username')
+    if uname:
+        return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
+    else:
+        return HttpResponse("please login in first!")
+
+# ce deploy process function
+def ceCheckPak(request):
+
+    if request.method == 'POST':
+        print "debug"
+        print request.body
+        print "debug 1111"
+        print request.POST
+
+
 
 
 

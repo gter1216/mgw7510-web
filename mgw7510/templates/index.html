@@ -100,7 +100,7 @@
                     <img src="/static/img/myCarousel_2.jpg" alt="Second slide">
                         <div class="carousel-caption">
                         	<p>
-                        		<a href="#" style="color: white; font-size: x-large;">
+                        		<a href="#" style="color: white; font-size: x-large;" id="ceOnline">
                         			MGW 7510 Cloud Edition is Online
 	    					    </a>
 	    				    </p>
@@ -143,7 +143,7 @@
         			<!--</a>-->
 					<img class="center-block" src="/static/img/ce_icon_meitu_5.jpg">
         			<h3 class="text-center">
-        				<a href="#">
+        				<a href="/ce-deploy" id="ceDeployment">
         					CE Deployment
         				</a>
         			</h3>
@@ -225,6 +225,11 @@
                     },
                     'html'
                 )
+			})
+
+            $('#ceDeployment,#ceOnline').click(function(event){
+                event.preventDefault();
+		        alert("Please login first!");
 			})
 
         });

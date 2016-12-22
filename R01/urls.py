@@ -53,6 +53,12 @@ urlpatterns = [
     # http://135.251.216.181/admin, This is an admin page to manage all registered users
     url(r'^admin/', include(admin.site.urls)),
 
+    # http://135.251.216.181/ce-deploy, This is an home page for ce auto deployment
+    url(r'^ce-deploy/$', 'mgw7510.views.ceDeploy'),
+
+    # http://135.251.216.181/ce-deploy, This is an home page for ce auto deployment
+    url(r'^ce-deploy/check-pak/$', 'mgw7510.views.ceCheckPak'),
+
 ]
 
 
