@@ -15,6 +15,11 @@ class WebUserForm(ModelForm):
     confirmNewPassword = forms.CharField(required=False)
     userWorkDir = forms.CharField(required=False)
 
+    pakServerIp = forms.GenericIPAddressField(required=False)
+    pakServerUsername = forms.CharField(required=False)
+    pakServerPasswd = forms.CharField(required=False)
+    pakServerFp = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'
