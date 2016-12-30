@@ -217,6 +217,15 @@ def ceCheckPak(request):
                 # query the ngnsvr11 to get package list and return it with JSON format
 
 
+def settings(request):
+    # if user logged
+    uname = request.session.get('username')
+    if uname:
+        return render(request, 'settings.html', {'paramUser': uname})
+    else:
+        return HttpResponse("please login in first!")
+
+
 
 
 

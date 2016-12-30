@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--
+        	author：xuxiao
+        	date：2016-12-05
+        	description: develped for Nokia MGW 7510 Auto Deployment
+        -->
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <!-- bootstrap 提供的缩放功能，在移动设备上可以禁用缩放功能，
+	                           这样看起来更像是原生的 APP 应用 -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+		<title>Nokia MGW 7510 Auto Deployment!</title>
+
+
+        <link rel="stylesheet" href="/static/css/bootstrap2.min.css" />
+        <link rel="stylesheet" href="/static/css/bootstrap.vertical-tabs.min.css" />
+        <link rel="stylesheet" href="../../static/css/bootstrapValidator.min.css" />
+		<!-- 自定义 css 文件-->
+		<link rel="stylesheet" href="/static/css/mystyle.css" />
+       	
+       	<!-- 引用 bootstrap 之前必须先引用 jqurey --> 		
+		<script type="text/javascript" src="/static/js/jquery-3.1.1.min.js" ></script>
+		<script type="text/javascript" src="/static/js/bootstrap.min.js" ></script>
+        <!-- 表单验证脚本 -->
+		<script type="text/javascript" src="../../static/js/bootstrapValidator.min.js"></script>
+		<!-- 自定义 JavaScript 文件-->
+		<script type="text/javascript" src="/static/js/myscript.js" ></script>
+	</head>
+	
+	<body>
+		
+		<!-- nav bar ======================================================= -->
+	    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+			<div class="container-fluid">
+				<div class="navbar-header navbar-left">
+					<a class=navbar-brand href="/">
+						Nokia MGW 7510 Auto Deployment
+					</a>
+					<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+				</div>
+				<div class="navbar-collapse collapse" id="navbar-main">
+					<ul class="nav navbar-nav navbar-right">
+						<li class="dropdown">
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">
+								Welcome {{paramUser}}
+								<span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu" aria-labelledby="themes">
+{#								<li><a href="/change-password/?p1={{user}}">change password</a></li>#}
+                                <li><a href="/settings">settings</a></li>
+								<li><a href="/logout">log out</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div> <!-- container -->
+		</nav>
+
+		<div style="height: 80px;"></div>
+
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h4>Settings</h4>
+                    <hr/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2"> <!-- required for floating -->
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs tabs-left">
+                        <li class="active"><a href="#changePassword" data-toggle="tab">Change Password</a></li>
+                        <li><a href="#ceDeploy" data-toggle="tab">CE Deploy</a></li>
+                        <li><a href="#" data-toggle="tab">Disabled</a></li>
+                        <li><a href="#" data-toggle="tab">Disabled</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-xs-9">
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <!-- ChangePassword Settings-->
+                        <div class="tab-pane active" id="changePassword">
+                            <form id="cpForm" method="post" class="form-horizontal" action="/change-password/ok/">
+                                <div class="alert alert-success" style="display: none;"></div>
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" style="font-weight: 300">UserName(Email address)</label>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" name="username" id="cpUsername" value={{paramUser}}>
+                                    </div>
+                                </div>
+
+                                <div style="height: 5px;"></div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" style="font-weight: 300">Old Password</label>
+                                    <div class="col-lg-4">
+                                        <input type="password" class="form-control" name="password" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" style="font-weight: 300">New Password</label>
+                                    <div class="col-lg-4">
+                                        <input type="password" class="form-control" name="newPassword" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <div style="height: 5px;"></div>
+
+                                <div class="form-group">
+                                    <label class="col-lg-3 control-label" style="font-weight: 300">Confirm New Password</label>
+                                    <div class="col-lg-4">
+                                        <input type="password" class="form-control" name="confirmNewPassword" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <div style="height: 5px;"></div>
+
+                                <div class="form-group">
+                                    <div class="col-lg-4 col-lg-offset-3">
+                                        <button type="submit" class="btn btn-primary btn-block">submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div> <!-- ChangePassword Settings-->
+
+                        <!-- CE Deploy Settings-->
+{#                        <div class="tab-pane" id="ceDeploy">#}
+{#                            <form id="ceDeploySettingForm" method="post" class="form-inline" action="ce-deploy-settings/">#}
+{#                                <div class="form-group">#}
+{#                                    <label class="col-lg-3 control-label" style="font-weight: 300">Yact Server IP</label>#}
+{#                                    <div class="col-lg-4">#}
+{#                                        <input type="text" class="form-control" name="username" id="cpUsername">#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </form>#}
+{#                        </div>#}
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- padding -->
+        <div style="height: 105px;"></div>
+        
+	    <!-- Footer: Address & Contact Info ===================================== -->	
+        <div class="panel-footer">
+        	<strong>Nokia, Inc. Shanghai, China</strong>
+				<br> 
+					MGW 7510, Network Management Team. Contact:
+					<a href="mailto:Xiao.A.Xu@alcatel-sbell.com.cn">
+						Xiao.A.Xu@alcatel-sbell.com.cn
+					</a>
+					<br>
+						Copyright © 2016  Nokia.inc All Rights Reserved
+					</br>
+				</br>
+        </div>
+
+        <script type="text/javascript">
+		$(document).ready(function() {
+		    validate_password_change();
+		});
+
+        function validate_password_change() {
+            $('#cpForm')
+                .bootstrapValidator({
+                    message: 'This value is not valid',
+                    //live: 'submitted',
+                    feedbackIcons: {
+                        valid: 'glyphicon glyphicon-ok',
+                        invalid: 'glyphicon glyphicon-remove',
+                        validating: 'glyphicon glyphicon-refresh'
+                    },
+                    fields: {
+                        username: {
+                            message: 'The username is not valid',
+                            validators: {
+                                notEmpty: {
+                                    message: 'The username is required and can\'t be empty'
+                                },
+                                emailAddress: {
+                                    message: 'The input is not a valid email address'
+                                }
+                            }
+                        },
+                        password: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'The old password is required and can\'t be empty'
+                                }
+                            }
+                        },
+                        newPassword: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'The new password is required and can\'t be empty'
+                                }
+                            }
+                        },
+                        confirmNewPassword: {
+                            validators: {
+                                notEmpty: {
+                                    message: 'The confirmed new password is required and cannot be empty'
+                                },
+                                identical: {
+                                    field: 'newPassword',
+                                    message: 'The new password and its confirm are not the same'
+                                }
+                            }
+                        }
+                    }
+                })
+                .on('success.form.bv', function (event) {
+                    // prevent submit button handler, exec the post action
+                    event.preventDefault();
+
+                    var $form = $(event.target),
+                        validator = $form.data('bootstrapValidator');
+
+                    $.post(
+                        $form.attr('action'),   // request url
+                        $form.serialize(), // data
+                        function (result) {
+                            if (result == "ok") {
+                                // return to home page
+                                alert("Congratulations! Password Change Successful! \n please login again");
+                                window.location.href = "/"
+                            }
+                            else {
+                                alert(result);
+                            }
+                        },
+                        'html'
+                    )
+                });
+        }
+
+		</script>
+		
+	</body>
+	
+</html>

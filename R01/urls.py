@@ -47,6 +47,8 @@ urlpatterns = [
     # http://135.251.216.181/login, This is the home page after log in
     url(r'^login-in/(.+)/$', 'mgw7510.views.loginIn'),
 
+    url(r'^settings/$', 'mgw7510.views.settings'),
+
     # http://135.251.216.181/logout, This is the page after the user logged out
     url(r'^logout/$', 'mgw7510.views.logout'),
 
