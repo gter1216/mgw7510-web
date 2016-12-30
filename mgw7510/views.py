@@ -109,7 +109,6 @@ def signup(request):
 
             # create directory per user
             user_work_dir = hp_uname.replace("@","_")
-            user_work_dir = user_work_dir.replace(".", "_")
             user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
             os.mkdir(user_work_dir)
 

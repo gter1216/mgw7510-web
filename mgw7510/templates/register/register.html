@@ -325,13 +325,12 @@
 		                        // return to home page
 								alert("Congratulations! Register Successful!");
 								// userName = xuxiao1216@126.com
-								var reuserName = $("#re-username").val()
+								var reuserName = $("#re-username").val();
 		                        window.location.href="/login-in" + "/"+ reuserName
 							}
 		                    else{
 		                        alert(result);
 		                        // reload current page then register again
-		                        window.location.reload();
 							}
                         },
                         'html'
