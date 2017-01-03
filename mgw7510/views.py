@@ -4,7 +4,6 @@ from mgw7510.forms import WebUserForm
 from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
-from django.conf import settings
 import os
 import logging
 
@@ -69,11 +68,11 @@ def changePasswdOk(request):
                         # change db_passwd to cp_new_passwd
                         MatchUser.password = cp_new_passwd
                         MatchUser.save()
-                        # clear the cookie
-                        try:
-                            del request.session['username']
-                        except KeyError:
-                            pass
+                        # # clear the cookie
+                        # try:
+                        #     del request.session['username']
+                        # except KeyError:
+                        #     pass
                         return HttpResponse('ok')
                     else:
                         return HttpResponse('new password and confirm new password not same')
@@ -109,7 +108,16 @@ def signup(request):
 
             # create directory per user
             user_work_dir = hp_uname.replace("@","_")
+<<<<<<< HEAD
             user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
+=======
+            user_work_dir = user_work_dir.replace(".", "_")
+            user_work_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/UserWorkDir/" + user_work_dir
+
+            # user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
+            print user_work_dir
+
+>>>>>>> 906aa96d13afa231d2870bd030376d7ac2f48c99
             os.mkdir(user_work_dir)
 
             WebUser.objects.create(username=hp_uname,
@@ -201,6 +209,15 @@ def ceDeploy(request):
     # if user logged
     uname = request.session.get('username')
     if uname:
+
+        user_found = WebUser.objects.get(username=uname)
+
+        # if ce_deploydir not exist, then create it
+        user_work_dir = user_found.userWorkDir
+        user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
+        if not os.path.isdir(user_ce_deploy_dir):
+            os.mkdir(user_ce_deploy_dir)
+
         return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
     else:
         return HttpResponse("please login in first!")
@@ -217,6 +234,7 @@ def ceCheckPak(request):
                 # query the ngnsvr11 to get package list and return it with JSON format
 
 
+<<<<<<< HEAD
 def settings(request):
     # if user logged
     uname = request.session.get('username')
@@ -224,6 +242,23 @@ def settings(request):
         return render(request, 'settings.html', {'paramUser': uname})
     else:
         return HttpResponse("please login in first!")
+=======
+# settings
+def settings(request):
+    # if find the cookie, then we think the user has been logged in
+    uname = request.session.get('username')
+    if uname:
+        return render(request, 'settings.html', {'user': uname})
+
+def getConfigData(request):
+    uname = request.session.get('username')
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+
+        pakServerIp = user_found.pakServerIp
+        pakServerFp = user_found.pakServerFp
+
+>>>>>>> 906aa96d13afa231d2870bd030376d7ac2f48c99
 
 
 
