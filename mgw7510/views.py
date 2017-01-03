@@ -117,7 +117,8 @@ def signup(request):
             # user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
             print user_work_dir
 
-            os.mkdir(user_work_dir)
+            if not os.path.isdir(user_work_dir):
+                os.mkdir(user_work_dir)
 
             WebUser.objects.create(username=hp_uname,
                                    password=hp_passwd,
@@ -253,6 +254,14 @@ def ceCheckPak(request):
                                                   pak_path)
         jstr = json.dumps(pak_list)
         return HttpResponse(jstr, content_type='application/json')
+
+def uploadFile(request):
+    if request.method == 'POST':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        user_found.tmpPath = uname.replace("@", "_")
+        user_found.userInputFile = request.FILES['userInputFile']
+        user_found.save()
 
 def settings(request):
     # if user logged

@@ -20,6 +20,10 @@ class WebUserForm(ModelForm):
     pakServerPasswd = forms.CharField(required=False)
     pakServerFp = forms.CharField(required=False)
 
+    userInputFile = forms.FileField(label='Select a file',
+                                    required=False)
+    tmpPath = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'

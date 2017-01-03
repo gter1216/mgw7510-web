@@ -182,7 +182,8 @@ EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = '<no-reply@sbc.nokia.com>'
 
 
-
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 
 

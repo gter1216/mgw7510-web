@@ -60,6 +60,7 @@ urlpatterns = [
     # http://135.251.216.181/ce-deploy, This is an home page for ce auto deployment
     url(r'^ce-deploy/$', 'mgw7510.views.ceDeploy'),
     url(r'^ce-deploy/check-pak/$', 'mgw7510.views.ceCheckPak'),
+    url(r'^ce-deploy/upload-file/$', 'mgw7510.views.uploadFile'),
 
 ]
 
