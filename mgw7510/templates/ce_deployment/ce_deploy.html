@@ -17,7 +17,7 @@
 
         <link rel="stylesheet" href="/static/css/bootstrap2.min.css" />
         <!-- File Upload Style -->
-{#        <link rel="stylesheet" href="/static/css/style.css"/>#}
+        <link rel="stylesheet" href="/static/css/style.css"/>
         <link rel="stylesheet" href="/static/css/blueimp-gallery.min.css"/>
 {#        <link rel="stylesheet" href="/static/css/jquery.fileupload.css/"/>#}
         <link rel="stylesheet" href="/static/css/jquery.fileupload-ui.css"/>
@@ -66,7 +66,7 @@
 			</div> <!-- container -->
 		</nav>
 
-		<div style="height: 100px;"></div>
+		<div style="height: 35px;"></div>
 
         <div class="container-fluid">
             <div class ="col-lg-10">
@@ -97,35 +97,41 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
 
-                <!-- The file upload form used as target for the file upload widget -->
-                <form id="fileupload" action="." method="POST" enctype="multipart/form-data">
-                    <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-                    <div class="fileupload-buttonbar">
-                        <div class="fileupload-buttons">
-                            <!-- The fileinput-button span is used to style the file input field as button -->
-                            <span class="fileinput-button">
-                                <span>Add files...</span>
-                                <input type="file" name="file" multiple>
-                            </span>
-                            <button type="submit" class="start">Start upload</button>
-                            <button type="reset" class="cancel">Cancel upload</button>
-                            <button type="button" class="delete">Delete</button>
-                            <input type="checkbox" class="toggle">
-                            <!-- The loading indicator is shown during file processing -->
-                            <span class="fileupload-loading"></span>
+        <!-- The file upload form used as target for the file upload widget -->
+        <div class="container-fluid">
+            <div class ="col-lg-10">
+                <div class="row">
+                    <form id="fileupload" action="." method="POST" enctype="multipart/form-data">
+                        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                        <div class="fileupload-buttonbar">
+                            <div class="fileupload-buttons">
+                                <!-- The fileinput-button span is used to style the file input field as button -->
+                                <span class="fileinput-button">
+                                    <span>Add files...</span>
+                                    <input type="file" name="file" multiple>
+                                </span>
+                                <button type="submit" class="start">Start upload</button>
+                                <button type="reset" class="cancel">Cancel upload</button>
+                                <button type="button" class="delete">Delete</button>
+                                <input type="checkbox" class="toggle">
+                                <!-- The loading indicator is shown during file processing -->
+                                <span class="fileupload-loading"></span>
+                            </div>
+                            <!-- The global progress information -->
+                            <div class="fileupload-progress fade" style="display:none">
+                                <!-- The global progress bar -->
+                                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                                <!-- The extended global progress information -->
+                                <div class="progress-extended">&nbsp;</div>
+                            </div>
                         </div>
-                        <!-- The global progress information -->
-                        <div class="fileupload-progress fade" style="display:none">
-                            <!-- The global progress bar -->
-                            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
-                            <!-- The extended global progress information -->
-                            <div class="progress-extended">&nbsp;</div>
-                        </div>
-                    </div>
-                    <!-- The table listing the files available for upload/download -->
-                    <table role="presentation"><tbody class="files"></tbody></table>
-                </form>
+                        <!-- The table listing the files available for upload/download -->
+                        <table role="presentation"><tbody class="files"></tbody></table>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -149,7 +155,7 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-                get_pak_list();
+{#                get_pak_list();#}
             });
 
             function get_pak_list(){

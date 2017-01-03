@@ -1,5 +1,5 @@
 /*
- * jQuery File Upload Processing Plugin
+ * jQuery File Upload Processing Plugin 1.2.2
  * https://github.com/blueimp/jQuery-File-Upload
  *
  * Copyright 2012, Sebastian Tschan
@@ -9,10 +9,10 @@
  * http://www.opensource.org/licenses/MIT
  */
 
-/* jshint nomen:false */
-/* global define, require, window */
+/*jslint nomen: true, unparam: true */
+/*global define, window */
 
-;(function (factory) {
+(function (factory) {
     'use strict';
     if (typeof define === 'function' && define.amd) {
         // Register as an anonymous AMD module:
@@ -20,12 +20,6 @@
             'jquery',
             './jquery.fileupload'
         ], factory);
-    } else if (typeof exports === 'object') {
-        // Node/CommonJS:
-        factory(
-            require('jquery'),
-            require('./jquery.fileupload')
-        );
     } else {
         // Browser globals:
         factory(
@@ -70,24 +64,20 @@
             */
         },
 
-        _processFile: function (data, originalData) {
+        _processFile: function (data) {
             var that = this,
                 dfd = $.Deferred().resolveWith(that, [data]),
                 chain = dfd.promise();
             this._trigger('process', null, data);
             $.each(data.processQueue, function (i, settings) {
                 var func = function (data) {
-                    if (originalData.errorThrown) {
-                        return $.Deferred()
-                                .rejectWith(that, [originalData]).promise();
-                    }
                     return that.processActions[settings.action].call(
                         that,
                         data,
                         settings
                     );
                 };
-                chain = chain.then(func, settings.always && func);
+                chain = chain.pipe(func, settings.always && func);
             });
             chain
                 .done(function () {
@@ -146,15 +136,11 @@
                 $.each(data.files, function (index) {
                     var opts = index ? $.extend({}, options) : options,
                         func = function () {
-                            if (data.errorThrown) {
-                                return $.Deferred()
-                                        .rejectWith(that, [data]).promise();
-                            }
-                            return that._processFile(opts, data);
+                            return that._processFile(opts);
                         };
                     opts.index = index;
                     that._processing += 1;
-                    that._processingQueue = that._processingQueue.then(func, func)
+                    that._processingQueue = that._processingQueue.pipe(func, func)
                         .always(function () {
                             that._processing -= 1;
                             if (that._processing === 0) {
