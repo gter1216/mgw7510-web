@@ -86,7 +86,7 @@
                     <div class="form-group">
                         <label for="select" class="col-lg-2 control-label text-left">Build (Pak Name)</label>
                         <div class="col-lg-4">
-                            <select class="form-control" id="selectPak">
+                            <select class="form-control" id="selectPak" style="width: 140%">
                                 <option>Please Select One Pak</option>
                             </select>
                         </div>
@@ -128,8 +128,19 @@
                     },
                     success : function(result){
                         // result form target url
-                        alert("get pak!");
-                    }
+                        if (result.hasOwnProperty("ok")){
+                            $.each(result["ok"],function(index,item){
+                                $('#selectPak').append(
+                                    "<option>" + item + "</option>"
+                                )
+                            })
+                        }
+                        // failed login to pak server
+                        else if (result.hasOwnProperty("nok")){
+                            alert(result["nok"])
+                        }
+                    },
+                    async: false
                 })
             } //function get_pak_list()
 

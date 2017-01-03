@@ -7,7 +7,7 @@ from django.core.mail import send_mail
 import os
 import logging
 import json
-import python_script
+from python_script import ce_deploy_scripts
 
 
 # global var
@@ -241,9 +241,18 @@ def ceCheckPak(request):
         # /viewstores/public/SLP/7510C71
         pak_path = user_found.pakServerFp + "/" + select_rel
 
+        pak_ip = user_found.pakServerIp
+        pak_username = user_found.pakServerUsername
+        pak_passwd = user_found.pakServerPasswd
+
         print pak_path
 
-        ce_deploy.
+        pak_list = ce_deploy_scripts.get_pak_list(pak_ip,
+                                                  pak_username,
+                                                  pak_passwd,
+                                                  pak_path)
+        jstr = json.dumps(pak_list)
+        return HttpResponse(jstr, content_type='application/json')
 
 def settings(request):
     # if user logged
