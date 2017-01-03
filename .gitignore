@@ -1,8 +1,8 @@
 *.log.*
 *.pyc
-*.log
 *.pid
-/.idea/
 *.db
+/.idea/
 /UserWorkDir/
 /media/
+/log/
