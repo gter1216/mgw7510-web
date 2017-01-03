@@ -24,6 +24,8 @@ class WebUserForm(ModelForm):
                                     required=False)
     tmpPath = forms.CharField(required=False)
 
+    userInputFileName = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'

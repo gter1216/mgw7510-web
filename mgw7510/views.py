@@ -4,10 +4,11 @@ from mgw7510.forms import WebUserForm
 from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
+from python_script import ce_deploy_scripts
 import os
 import logging
 import json
-from python_script import ce_deploy_scripts
+import shutil
 
 
 # global var
@@ -259,8 +260,15 @@ def uploadFile(request):
     if request.method == 'POST':
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
-        user_found.tmpPath = uname.replace("@", "_")
+        uname = uname.replace("@", "_")
+
+        # remove all files under user directory
+        file_path = BASE_DIR + "/media/" + uname
+        shutil.rmtree(file_path)
+
+        user_found.tmpPath = uname
         user_found.userInputFile = request.FILES['userInputFile']
+        user_found.userInputFileName = request.FILES['userInputFile'].name
         user_found.save()
 
 def settings(request):
