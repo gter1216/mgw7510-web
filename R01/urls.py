@@ -48,9 +48,7 @@ urlpatterns = [
     url(r'^login-in/(.+)/$', 'mgw7510.views.loginIn'),
 
     url(r'^settings/$', 'mgw7510.views.settings'),
-
     url(r'^settings/get-current-config$', 'mgw7510.views.getCurrentConfig'),
-
     url(r'^settings/save-config$', 'mgw7510.views.saveConfig'),
 
     # http://135.251.216.181/logout, This is the page after the user logged out
@@ -61,8 +59,6 @@ urlpatterns = [
 
     # http://135.251.216.181/ce-deploy, This is an home page for ce auto deployment
     url(r'^ce-deploy/$', 'mgw7510.views.ceDeploy'),
-
-    # http://135.251.216.181/ce-deploy, This is an home page for ce auto deployment
     url(r'^ce-deploy/check-pak/$', 'mgw7510.views.ceCheckPak'),
 
 ]

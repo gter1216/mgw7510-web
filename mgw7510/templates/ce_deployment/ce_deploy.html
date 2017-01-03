@@ -75,7 +75,7 @@
                     <div class="form-group">
                         <label for="select" class="col-lg-2 control-label text-left">Release</label>
                         <div class="col-lg-2">
-                            <select class="form-control" id="project">
+                            <select class="form-control" id="selectRel">
                                 <option>C7.1</option>
                             </select>
                         </div>
@@ -115,23 +115,24 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-                init();
+                get_pak_list();
             });
 
-            function init(){
+            function get_pak_list(){
                 $.ajax({
                     type : "POST", // POST request
                     dataType : "json", // expect json format data
                     url : "check-pak/", // target url
                     data : {
-                        "selectPak" : "none"
+                        "selectRel" : $('#selectRel').val()
                     },
                     success : function(result){
                         // result form target url
                         alert("get pak!");
                     }
                 })
-            }
+            } //function get_pak_list()
+
         </script>
 		
 	</body>

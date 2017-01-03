@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 import os
 import logging
 import json
+import python_script
 
 
 # global var
@@ -226,10 +227,23 @@ def ceCheckPak(request):
         # request.POST ====> <QueryDict: {u'selectPak': [u'none']}>
         # request.body ====> selectPak=none
 
-        if request.POST.has_key('selectPak'):
-            if request.POST['selectPak'] == 'none':
-                print "ok"
-                # query the ngnsvr11 to get package list and return it with JSON format
+        # if request.POST.has_key('selectPak'):
+        #     if request.POST['selectPak'] == 'none':
+        #         print "ok"
+
+        uname = request.session.get('username')
+
+        user_found = WebUser.objects.get(username=uname)
+
+        select_rel = request.POST['selectRel']
+        select_rel = "7510" + select_rel.replace(".", "")
+
+        # /viewstores/public/SLP/7510C71
+        pak_path = user_found.pakServerFp + "/" + select_rel
+
+        print pak_path
+
+        ce_deploy.
 
 def settings(request):
     # if user logged
