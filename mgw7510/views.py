@@ -8,6 +8,8 @@ import os
 import logging
 
 
+# global var
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 logger = logging.getLogger("django")
 
 # Create your views here.
@@ -108,16 +110,11 @@ def signup(request):
 
             # create directory per user
             user_work_dir = hp_uname.replace("@","_")
-<<<<<<< HEAD
-            user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
-=======
-            user_work_dir = user_work_dir.replace(".", "_")
-            user_work_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/UserWorkDir/" + user_work_dir
+            user_work_dir = BASE_DIR + "/UserWorkDir/" + user_work_dir
 
             # user_work_dir = settings.BASE_DIR + "/UserWorkDir/" + user_work_dir
             print user_work_dir
 
->>>>>>> 906aa96d13afa231d2870bd030376d7ac2f48c99
             os.mkdir(user_work_dir)
 
             WebUser.objects.create(username=hp_uname,
@@ -233,8 +230,6 @@ def ceCheckPak(request):
                 print "ok"
                 # query the ngnsvr11 to get package list and return it with JSON format
 
-
-<<<<<<< HEAD
 def settings(request):
     # if user logged
     uname = request.session.get('username')
@@ -242,7 +237,7 @@ def settings(request):
         return render(request, 'settings.html', {'paramUser': uname})
     else:
         return HttpResponse("please login in first!")
-=======
+
 # settings
 def settings(request):
     # if find the cookie, then we think the user has been logged in
@@ -258,7 +253,6 @@ def getConfigData(request):
         pakServerIp = user_found.pakServerIp
         pakServerFp = user_found.pakServerFp
 
->>>>>>> 906aa96d13afa231d2870bd030376d7ac2f48c99
 
 
 

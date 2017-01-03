@@ -12,11 +12,11 @@ class WebUser(models.Model):
 
     # CE Deployment, add default value
     pakServerIp = models.GenericIPAddressField(max_length=50,
-                                        default="135.251.49.21")
+                                               default="135.251.49.21")
     pakServerUsername = models.CharField(max_length=100,
-                                         default="")
+                                         default="xxu")
     pakServerPasswd = models.CharField(max_length=50,
-                                       default="")
+                                       default="initial")
     pakServerFp = models.CharField(max_length=500,
                                    default="/viewstores/public/SLP")
 
