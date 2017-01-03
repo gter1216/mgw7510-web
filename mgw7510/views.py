@@ -269,8 +269,15 @@ def uploadFile(request):
 
         user_found.tmpPath = uname
         user_found.userInputFile = request.FILES['userInputFile']
-        user_found.userInputFileName = request.FILES['userInputFile'].name
+        file_name = request.FILES['userInputFile'].name
+        user_found.userInputFileName = file_name
         user_found.save()
+
+        files = [{'name': file_name}]
+        data = {'files': files}
+        jstr = json.dumps(data)
+
+        return HttpResponse(jstr, content_type='application/json')
 
 def settings(request):
     # if user logged
