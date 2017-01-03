@@ -140,7 +140,7 @@
                             </form>
                         </div> <!-- ChangePassword Settings-->
 
-                        <!-- CE Deploy Settings-->
+                                                <!-- CE Deploy Settings-->
 {#                        <div class="tab-pane" id="ceDeploy">#}
 {#                            <form id="ceDeploySettingForm" method="post" class="form-inline" action="ce-deploy-settings/">#}
 {#                                <div class="form-group">#}
@@ -152,180 +152,11 @@
 {#                            </form>#}
 {#                        </div>#}
 
-
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                            {{user}}
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="/settings">settings</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/logout">log out</a></li>
-                        </ul>
-                    </li>
-                </ul>
-			</div> <!-- container -->
-		</nav>
-
-		<div style="height: 50px;"></div>
-
-        <div class="container-fluid">
-            <div class="row">
-                <!--Tab Overall has 8 col-->
-                <div class="col-lg-8">
-                    <h3 style="font-weight: 700; font-size: 26px; margin-left: 18px">User Settings</h3>
-                    <hr>
-
-                    <div class="container-fluid">
-                        <div class="row">
-                             <!-- Tabs' Label-->
-                            <div class = "col-lg-3">
-                                <ul class="nav nav-tabs tabs-left">
-                                    <li class="active"><a href="#changePass" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Password Change</a></li>
-                                    <li><a href="#ceDeploy" data-toggle="tab" style="font-weight: 700; font-size: 13px;">CE Deploy Settings</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                    <li><a href="#" data-toggle="tab" style="font-weight: 700; font-size: 13px;">Not Used</a></li>
-                                </ul>
-                            </div>
-                            <!--Tabs'content-->
-                            <div class = "tab-content">
-
-                                <!--First Tab Content: Change Password Start-->
-                                <div class="tab-pane active" id="changePass">
-                                    <div class="col-lg-9">
-                                        <div class ="container-fluid">
-                                            <div class="row">
-                                                <form id="cpForm" method="post" class="form-horizontal" action="change-password/">
-                                                    <div style="height: 10px;"></div>
-                                                    <div class="form-group">
-                                                        <label class="col-lg-3 control-label text-left" style="font-weight: 200">UserName(Email)</label>
-                                                        <div class="col-lg-5">
-                                                            <input type="text" class="form-control" name="username" id="cpUsername" value={{user}}>
-                                                        </div>
-                                                    </div>
-                                                    <div style="height: 5px;"></div>
-                                                    <div class="form-group">
-                                                        <label class="col-lg-3 control-label" style="font-weight: 200">Old Password</label>
-                                                        <div class="col-lg-5">
-                                                            <input type="password" class="form-control" name="password" autocomplete="off" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-lg-3 control-label" style="font-weight: 200">New Password</label>
-                                                        <div class="col-lg-5">
-                                                            <input type="password" class="form-control" name="newPassword" autocomplete="off" />
-                                                        </div>
-                                                    </div>
-                                                    <div style="height: 5px;"></div>
-                                                    <div class="form-group">
-                                                        <label class="col-lg-3 control-label" style="margin-top: -10px; font-weight: 200">Confirm New Password</label>
-                                                        <div class="col-lg-5" >
-                                                            <input type="password" class="form-control" name="confirmNewPassword" autocomplete="off" />
-                                                        </div>
-                                                    </div>
-                                                    <div style="height: 5px;"></div>
-                                                    <div class="form-group">
-                                                        <div class="col-lg-5 col-lg-offset-3">
-                                                            <button type="submit" class="btn btn-primary btn-block" style="font-weight: 200">save</button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!--First Tab Content: Change Password End-->
-
-                                <!--Second Tab Content: CE Deploy Settings Start-->
-                                <div class="tab-pane" id="ceDeploy">
-                                    <div class="col-lg-9">
-                                        <div class ="container-fluid">
-                                            <div class="row">
-                                                <div style="height: 10px;"></div>
-                                                <form id="ceDeployForm" method="post" class="form-horizontal" action="ce-deployment/">
-                                                    <!--Pak Server Setting Start-->
-                                                    <h5 style="margin-bottom: -15px">Pak Server Setting</h5>
-                                                    <hr style="height:1px;border:none;border-top:1px solid #317eac;" />
-                                                    <div class="form-inline" id="pakServerInformationFirstLine">
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 15px">IP Addr</label>
-                                                            <input type="text" name="pakServerIp" id="PakServerIp" style="margin-left: 5px; width: 120px;">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 50px">Username</label>
-                                                            <input type="text"  name="pakServerUsername" id="PakServerUsername" style="margin-left: 5px; width: 120px;">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 50px">Password</label>
-                                                            <input type="text"  name="pakServerPasswd" id="PakServerPasswd" style="margin-left: 5px; width: 120px;">
-                                                        </div>
-                                                    </div>
-                                                    <div style="height: 15px;"></div>
-                                                    <div class="form-inline" id="pakServerInformationSecondLine">
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 15px">CE Pak File Path</label>
-                                                            <input type="text"  name="pakServerFp" id="PakServerFp" style="margin-left: 5px; width: 350px;">
-                                                        </div>
-                                                    </div>
-                                                    <!--Pak Server Setting End-->
-
-                                                    <div style="height: 50px;"></div>
-
-                                                    <!--Yact Server Setting Start-->
-                                                    <h5 style="margin-bottom: -15px">Yact Server Setting</h5>
-                                                    <hr style="height:1px;border:none;border-top:1px solid #317eac;" />
-                                                    <div class="form-inline" id="pakServerInformation">
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 15px">IP Addr</label>
-                                                            <input type="text" name="pakServerIp" id="pakServerIp" style="margin-left: 7px; width: 120px;">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 50px">Username</label>
-                                                            <input type="text"  name="pakServerUsername" id="pakServerUsername" style="margin-left: 5px; width: 120px;">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label style="font-weight: 100; margin-left: 50px">Password</label>
-                                                            <input type="text"  name="pakServerPasswd" id="pakServerPasswd" style="margin-left: 5px; width: 120px;">
-                                                        </div>
-                                                    </div>
-                                                    <!--Pak Server Setting End-->
-
-
-                                                </form>
-
-
-
-
-{#                                                    <div class="form-group">#}
-{#                                                        <div class="col-md-3 col-md-offset-2">#}
-{#                                                            <button type="submit" class="btn btn-primary btn-block">save</button>#}
-{#                                                        </div>#}
-{#                                                    </div>#}
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!--Second Tab Content: CE Deploy Settings End-->
-
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-
-
-
-        <!-- padding -->
-        <div style="height: 105px;"></div>
         <!-- padding -->
         <div style="height: 600px;"></div>
         
@@ -342,6 +173,7 @@
 					</br>
 				</br>
         </div>
+
 
         <script type="text/javascript">
 
@@ -424,99 +256,6 @@
         }
 
 		</script>
-
-            $(document).ready(function() {
-
-                $('#cpForm')
-                    .bootstrapValidator({
-                        message: 'This value is not valid',
-                        feedbackIcons: {
-                            valid: 'glyphicon glyphicon-ok',
-                            invalid: 'glyphicon glyphicon-remove',
-                            validating: 'glyphicon glyphicon-refresh'
-                        },
-                        fields: {
-                            username: {
-                                message: 'The username is not valid',
-                                validators: {
-                                    notEmpty: {
-                                        message: 'The username is required and can\'t be empty'
-                                    },
-                                    emailAddress: {
-                                        message: 'The input is not a valid email address'
-                                    }
-                                }
-                            },
-                            password: {
-                                validators: {
-                                    notEmpty: {
-                                        message: 'The old password is required and can\'t be empty'
-                                    }
-                                }
-                            },
-                            newPassword: {
-                                validators: {
-                                    notEmpty: {
-                                        message: 'The new password is required and can\'t be empty'
-                                    }
-                                }
-                            },
-                            confirmNewPassword: {
-                                validators: {
-                                    notEmpty: {
-                                        message: 'The confirmed new password is required and cannot be empty'
-                                    },
-                                    identical: {
-                                        field: 'newPassword',
-                                        message: 'The new password and its confirm are not the same'
-                                    }
-                                }
-                            }
-                        }
-                    })
-                    .on('success.form.bv', function(event) {
-                        // prevent submit button handler, exec the post action
-                        event.preventDefault();
-
-                        var $form = $(event.target),
-                            validator = $form.data('bootstrapValidator');
-
-                        $.post(
-                            $form.attr('action'),   // request url
-                            $form.serialize(), // data
-                            function(result){
-                                if(result == "ok"){
-                                    // return to home page
-                                    alert("Save Success!");
-                                    window.location.href="/settings"
-                                }
-                                else{
-                                    alert(result);
-                                    window.location.href="/settings"
-                                }
-                            },
-                            'html'
-                        )
-                    }); // $('#cpForm')
-
-                // another script, get data from database
-                $.ajax({
-                    type : "POST", // POST request
-                    dataType : "json", // expect json format data
-                    url : "get-config-data/", // target url
-                    data : {
-                        "getConfigData" : "ok"
-                    },
-                    success : function(result){
-                        // result form target url
-                        alert("get pak!");
-                    }
-                })
-
-                // another script
-
-            });
-        </script>
 
 
 	</body>
