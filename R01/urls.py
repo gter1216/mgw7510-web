@@ -49,6 +49,10 @@ urlpatterns = [
 
     url(r'^settings/$', 'mgw7510.views.settings'),
 
+    url(r'^settings/get-current-config$', 'mgw7510.views.getCurrentConfig'),
+
+    url(r'^settings/save-config$', 'mgw7510.views.saveConfig'),
+
     # http://135.251.216.181/logout, This is the page after the user logged out
     url(r'^logout/$', 'mgw7510.views.logout'),
 

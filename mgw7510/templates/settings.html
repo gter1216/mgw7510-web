@@ -56,7 +56,7 @@
 					<ul class="nav navbar-nav navbar-right">
 						<li class="dropdown">
 							<a class="dropdown-toggle" data-toggle="dropdown" href="#" id="themes">
-								Welcome {{paramUser}}
+								Welcome {{user}}
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="themes">
@@ -142,19 +142,54 @@
 
                         <!-- CE Deploy Settings-->
                         <div class="tab-pane" id="ceDeploy">
-                            <form id="ceDeploySettingForm" method="post" class="form-inline" action="ce-deploy-settings/" role="form" >
-                                <div class="form-group">
-                                    <label class="control-label" style="font-weight: 300">Yact Server IP</label>
-                                    <input type="text" class="form-control" name="username" id="cpUsername" style="width: 50%">
+                            <form id="ceDeploySettingForm" method="post" class="form-inline" role="form" >
+
+                                <!-- Pak Server Config-->
+                                <div style="margin-bottom: 0em; font-weight: 600">Pak Server</div>
+                                <hr style="margin-bottom: 1em; margin-top: 0em; width: 65%; margin-left: -0.5%;height: 1px">
+                                <div class="form-group" >
+                                    <label class="control-label" style="font-weight: 300;">IP Address</label>
+                                    <input type="text" class="form-control" name="pakServerIp" id="pakServerIp" style="width: 50%">
                                 </div>
-                                <div class="form-group">
-                                    <label class="control-label" style="font-weight: 300; margin-left: 0em">Username</label>
-                                    <input type="text" class="form-control" name="username" id="cpUsername" style="width: 50%">
+                                <div class="form-group" style="margin-left: -2%">
+                                    <label class="control-label" style="font-weight: 300;">Username</label>
+                                    <input type="text" class="form-control" name="pakServerUsername" id="pakServerUsername" style="width: 30%">
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label" style="font-weight: 300">Password</label>
-                                    <input type="text" class="form-control" name="username" id="cpUsername" style="width: 50%">
+                                <div class="form-group" style="margin-left: -8%">
+                                    <label class="control-label" style="font-weight: 300">Password</label>
+                                    <input type="text" class="form-control" name="pakServerPasswd" id="pakServerPasswd" style="width: 30%">
                                 </div>
+                                <div style="height: 10px"></div>
+                                <div class="form-group">
+                                    <label class="control-label" style="font-weight: 300;">Pak File Path</label>
+                                    <input type="text" class="form-control" name="pakServerFp" id="pakServerFp">
+                                </div> <!-- Yact Server Config-->
+
+                                <div style="height: 30px;"></div>
+
+                                <!-- Yact Server Config-->
+                                <div style="margin-bottom: 0em; font-weight: 600">Yact Server</div>
+                                <hr style="margin-bottom: 1em; margin-top: 0em; width: 65%; margin-left: -0.5%;height: 1px">
+                                <div class="form-group" >
+                                    <label class="control-label" style="font-weight: 300;">IP Address</label>
+                                    <input type="text" class="form-control" name="yactUsername" id="yactUsername" style="width: 50%">
+                                </div>
+                                <div class="form-group" style="margin-left: -2%">
+                                    <label class="control-label" style="font-weight: 300;">Username</label>
+                                    <input type="text" class="form-control" name="yactUsername" id="yactUsername" style="width: 30%">
+                                </div>
+                                <div class="form-group" style="margin-left: -8%">
+                                    <label class="control-label" style="font-weight: 300">Password</label>
+                                    <input type="text" class="form-control" name="yactUsername" id="yactUsername" style="width: 30%">
+                                </div>  <!-- Yact Server Config-->
+
+                                <!-- Save Config-->
+                                <div style="height:50px;"></div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary btn-block" style="margin-left: 480%">Save Config</button>
+                                </div> <!-- Save Config-->
+
+
                             </form>
                         </div>
 
@@ -185,6 +220,8 @@
 
 		$(document).ready(function() {
 		    validate_password_change();
+		    get_current_config();
+		    save_config();
 		});
 
         function validate_password_change() {
@@ -259,7 +296,53 @@
                         'html'
                     )
                 });
-        }
+        } //function validate_password_change()
+
+        function get_current_config(){
+            // get current settings from database
+            $.post({
+                url: 'get-current-config',
+                type: 'POST',
+                dataType: 'json',
+                success: function(result){
+                    $.each(result,function(key,val){
+                        $('#'+key).attr("value",val)
+                    })
+                }
+            })
+        } // function get_current_config()
+
+        function save_config(){
+            // save the new config data to database
+            $('#ceDeploySettingForm').on('submit', function (event) {
+
+                event.preventDefault();
+
+                var newConfigData = {
+                    'pakServerIp': $('#pakServerIp').val(),
+                    'pakServerUsername': $('#pakServerUsername').val(),
+                    'pakServerPasswd': $('#pakServerPasswd').val(),
+                    'pakServerFp': $('#pakServerFp').val()
+                };
+
+                $.post({
+                    url: 'save-config',
+                    type: 'POST',
+                    // we can also use form serialize function
+                    data: JSON.stringify(newConfigData),
+                    dataType: 'html',
+                    success: function(result){
+                        if(result == "ok"){
+                            alert("Data Save Successful!");
+                        }
+                        else{
+                            alert(result);
+                        }
+                    }
+                })
+            })
+
+        } // function save_config()
 
 		</script>
 

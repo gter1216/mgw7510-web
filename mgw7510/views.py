@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 import os
 import logging
+import json
 
 
 # global var
@@ -234,7 +235,7 @@ def settings(request):
     # if user logged
     uname = request.session.get('username')
     if uname:
-        return render(request, 'settings.html', {'paramUser': uname})
+        return render(request, 'settings.html', {'user': uname})
     else:
         return HttpResponse("please login in first!")
 
@@ -245,15 +246,41 @@ def settings(request):
     if uname:
         return render(request, 'settings.html', {'user': uname})
 
-def getConfigData(request):
+def getCurrentConfig(request):
     uname = request.session.get('username')
     if uname:
         user_found = WebUser.objects.get(username=uname)
 
-        pakServerIp = user_found.pakServerIp
-        pakServerFp = user_found.pakServerFp
+        config_data = {'pakServerIp': user_found.pakServerIp,
+                       'pakServerUsername': user_found.pakServerUsername,
+                       'pakServerPasswd': user_found.pakServerPasswd,
+                       'pakServerFp': user_found.pakServerFp}
 
 
+    jstr = json.dumps(config_data)
+
+    return HttpResponse(jstr, content_type='application/json')
+
+def saveConfig(request):
+    uname = request.session.get('username')
+
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+
+        # parse the json data from front-end
+        new_config_data = json.loads(request.body)
+
+        user_found.pakServerIp = new_config_data['pakServerIp']
+        user_found.pakServerUsername = new_config_data['pakServerUsername']
+        user_found.pakServerPasswd = new_config_data['pakServerPasswd']
+        user_found.pakServerFp = new_config_data['pakServerFp']
+
+        user_found.save()
+
+        return HttpResponse('ok')
+
+    else:
+        return HttpResponse('user not found')
 
 
 
