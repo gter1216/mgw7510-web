@@ -262,9 +262,10 @@ def uploadFile(request):
         user_found = WebUser.objects.get(username=uname)
         uname = uname.replace("@", "_")
 
-        # remove all files under user directory
+        # remove all files under user directory if exists
         file_path = BASE_DIR + "/media/" + uname
-        shutil.rmtree(file_path)
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
 
         user_found.tmpPath = uname
         user_found.userInputFile = request.FILES['userInputFile']
