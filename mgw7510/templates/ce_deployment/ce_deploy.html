@@ -145,12 +145,17 @@
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-2">
-                    <button type="submit" class="btn btn-primary btn-block col-lg-2">Start</button>
+                    <button type="button" id="startCe" class="btn btn-primary btn-block col-lg-2">Start</button>
+                </div>
+            </div>
+            <div style="height: 20px;"></div>
+            <div class="row" style="margin-left:0.1%">
+                <div class="col-lg-6">
+                    <div class="progress progress-striped active fade" id="progressOutter">
+                    <div class="progress-bar progress-bar-warning" id="progressInner" style="width: 0%"></div>
                 </div>
             </div>
         </div>
-
-
 
 
         <!-- padding -->
@@ -173,6 +178,7 @@
         <script type="text/javascript">
             $(document).ready(function(){
 {#                get_pak_list();#}
+                update_progress_bar();
             });
 
             function get_pak_list(){
@@ -200,6 +206,40 @@
                     async: false
                 })
             } //function get_pak_list()
+
+            function update_progress_bar() {
+
+                $('#startCe').click(function(event){
+
+                    $('#progressOutter').removeClass("fade");
+
+                    var progresspump = setInterval(function () {
+                        $.get("update-progress/", function (data) {
+
+                            // if failed, the data is 101
+                            if (data=="101"){
+                                $('#progressOutter').removeClass("active");
+                                $('#progressInner').css('width', '100%');
+                                $('#progressInner').removeClass("progress-bar-warning");
+                                $('#progressInner').addClass("progress-bar-danger");
+                                $('#progressInner').html("Failed, Please check log!")
+                                return
+                            }
+
+                            $('#progressInner').css('width', data + '%');
+                            $('#progressInner').html(data + '%');
+
+                            if (data > 99.999) {
+                                clearInterval(progresspump);
+                                $('#progressOutter').removeClass("active");
+                                $('#progressInner').html("Success Done!")
+                                return
+                            }
+                        })
+                    }, 1000) // var progresspump
+                })
+
+            }
 
         </script>
 

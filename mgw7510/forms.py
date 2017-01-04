@@ -26,6 +26,8 @@ class WebUserForm(ModelForm):
 
     userInputFileName = forms.CharField(required=False)
 
+    progressBarData = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'

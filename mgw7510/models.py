@@ -41,5 +41,8 @@ class WebUser(models.Model):
                                          blank=True,
                                          max_length=100)
 
+    progressBarData = models.CharField(default="0",
+                                       max_length=5)
+
     def __unicode__(self):
         return self.username

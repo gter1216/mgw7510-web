@@ -279,6 +279,12 @@ def uploadFile(request):
 
         return HttpResponse(jstr, content_type='application/json')
 
+def updateProgress(request):
+    if request.method == 'GET':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        return HttpResponse(user_found.progressBarData)
+
 def settings(request):
     # if user logged
     uname = request.session.get('username')
