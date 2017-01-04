@@ -65,6 +65,7 @@
 			</div> <!-- container -->
 		</nav>
 
+
 		<div style="height: 35px;"></div>
 
         <div class="container-fluid">
@@ -98,6 +99,7 @@
                 </form>
             </div>
         </div>
+
 
         <div style="height: 35px;"></div>
 
@@ -141,6 +143,7 @@
             </div>
         </div>
 
+
         <div style="height: 30px;"></div>
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
@@ -152,7 +155,8 @@
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-6">
                     <div class="progress progress-striped active fade" id="progressOutter">
-                    <div class="progress-bar progress-bar-warning" id="progressInner" style="width: 0%"></div>
+                        <div class="progress-bar progress-bar-warning" id="progressInner" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -211,9 +215,7 @@
             function start_ce_deployment(){
                 $('#startCe').click(function(event){
                     update_progress_bar();
-
-{#                    $.post()#}
-
+                    contact_server();
                 })
             }
 
@@ -246,7 +248,21 @@
                 }, 1000); // var progresspump
             }
 
+            function contact_server(){
 
+                var userData = {
+                    'selectRel':$('#selectRel').val(),
+                    'selectPak':$('#selectPak').val()
+                };
+
+                // start ce deploy
+                $.post({
+                    url: 'start/',
+                    type: 'POST',
+                    // we can also use form serialize function
+                    data: JSON.stringify(userData)
+                })
+            }
 
         </script>
 
@@ -353,7 +369,8 @@
         <script src="/static/js/jquery.fileupload-ui.js"></script>
         <!-- The main application script -->
         <script src="/static/js/main.js"></script>
-		
-	</body>
+
+
+    </body>
 	
 </html>

@@ -204,6 +204,48 @@ def forgetPasswd(request):
     else:
         return HttpResponse('not post method')
 
+def settings(request):
+    # if user logged
+    uname = request.session.get('username')
+    if uname:
+        return render(request, 'settings.html', {'user': uname})
+    else:
+        return HttpResponse("please login in first!")
+
+def getCurrentConfig(request):
+    uname = request.session.get('username')
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+
+        config_data = {'pakServerIp': user_found.pakServerIp, 'pakServerUsername': user_found.pakServerUsername,
+                       'pakServerPasswd': user_found.pakServerPasswd, 'pakServerFp': user_found.pakServerFp}
+
+    jstr = json.dumps(config_data)
+
+    return HttpResponse(jstr, content_type='application/json')
+
+def saveConfig(request):
+    uname = request.session.get('username')
+
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+
+        # parse the json data from front-end
+        new_config_data = json.loads(request.body)
+
+        user_found.pakServerIp = new_config_data['pakServerIp']
+        user_found.pakServerUsername = new_config_data['pakServerUsername']
+        user_found.pakServerPasswd = new_config_data['pakServerPasswd']
+        user_found.pakServerFp = new_config_data['pakServerFp']
+
+        user_found.save()
+
+        return HttpResponse('ok')
+
+    else:
+        return HttpResponse('user not found')
+
+
 # request an home page for ce deploy
 def ceDeploy(request):
 
@@ -285,56 +327,24 @@ def updateProgress(request):
         user_found = WebUser.objects.get(username=uname)
         return HttpResponse(user_found.progressBarData)
 
-def settings(request):
-    # if user logged
-    uname = request.session.get('username')
-    if uname:
-        return render(request, 'settings.html', {'user': uname})
-    else:
-        return HttpResponse("please login in first!")
 
-# settings
-def settings(request):
-    # if find the cookie, then we think the user has been logged in
-    uname = request.session.get('username')
-    if uname:
-        return render(request, 'settings.html', {'user': uname})
-
-def getCurrentConfig(request):
-    uname = request.session.get('username')
-    if uname:
-        user_found = WebUser.objects.get(username=uname)
-
-        config_data = {'pakServerIp': user_found.pakServerIp,
-                       'pakServerUsername': user_found.pakServerUsername,
-                       'pakServerPasswd': user_found.pakServerPasswd,
-                       'pakServerFp': user_found.pakServerFp}
-
-
-    jstr = json.dumps(config_data)
-
-    return HttpResponse(jstr, content_type='application/json')
-
-def saveConfig(request):
+def ceDeoployStart(request):
     uname = request.session.get('username')
 
     if uname:
-        user_found = WebUser.objects.get(username=uname)
 
         # parse the json data from front-end
-        new_config_data = json.loads(request.body)
+        user_data = json.loads(request.body)
 
-        user_found.pakServerIp = new_config_data['pakServerIp']
-        user_found.pakServerUsername = new_config_data['pakServerUsername']
-        user_found.pakServerPasswd = new_config_data['pakServerPasswd']
-        user_found.pakServerFp = new_config_data['pakServerFp']
+        select_rel = user_data['selectRel']
+        select_pak = user_data['selectPak']
 
-        user_found.save()
+        ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
+        return HttpResponse("ok")
 
-        return HttpResponse('ok')
 
-    else:
-        return HttpResponse('user not found')
+
+
 
 
 

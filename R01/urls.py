@@ -62,7 +62,7 @@ urlpatterns = [
     url(r'^ce-deploy/check-pak/$', 'mgw7510.views.ceCheckPak'),
     url(r'^ce-deploy/upload-file/$', 'mgw7510.views.uploadFile'),
     url(r'^ce-deploy/update-progress/$', 'mgw7510.views.updateProgress'),
-
+    url(r'^ce-deploy/start/$', 'mgw7510.views.ceDeoployStart'),
 
 
 ]
