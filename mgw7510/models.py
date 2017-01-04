@@ -44,5 +44,9 @@ class WebUser(models.Model):
     progressBarData = models.CharField(default="0",
                                        max_length=5)
 
+    # default is nok, which means that user input file not uploaded
+    userInputUploadedFlag = models.CharField(default="nok",
+                                             max_length=5)
+
     def __unicode__(self):
         return self.username

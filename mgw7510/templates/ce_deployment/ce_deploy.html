@@ -115,11 +115,11 @@
                                     Please upload user input file
                                 </label>
                                 <!-- The fileinput-button span is used to style the file input field as button -->
-                                <span class="btn btn-success fileinput-button">
+                                <span class="btn btn-info fileinput-button" id="addFileBton">
                                     <i class="glyphicon glyphicon-plus"></i>
-                                    <span>Add files...</span>
+                                    <span>Add file...</span>
                                     <!-- The name shoule be same with django view-->
-                                    <input type="file" name="userInputFile">
+                                    <input type="file" name="userInputFile" id="addFileInput">
                                 </span>
                                 <!-- The global file processing state -->
                                 <span class="fileupload-process"></span>
@@ -143,24 +143,45 @@
             </div>
         </div>
 
-
         <div style="height: 30px;"></div>
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
-                <div class="col-lg-2">
+                <div class="col-lg-1">
                     <button type="button" id="startCe" class="btn btn-primary btn-block col-lg-2">Start</button>
+                </div>
+                <div class="col-lg-1">
+                    <button type="button" id="continueCe" class="btn btn-warning btn-block col-lg-2 disabled">Continue</button>
+                </div>
+                <div class="col-lg-1">
+                    <button type="button" id="stopCe" class="btn btn-danger btn-block col-lg-2 disabled">Stop</button>
                 </div>
             </div>
             <div style="height: 20px;"></div>
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-6">
                     <div class="progress progress-striped active fade" id="progressOutter">
-                        <div class="progress-bar progress-bar-warning" id="progressInner" style="width: 0%"></div>
+                        <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <div style="height: 10px;"></div>
+
+        <div class="container-fluid">
+            <div class="row" style="margin-left:0.1%">
+                <div class = "col-lg-8">
+                    <div class="alert alert-dismissible alert-warning fade" id="logfile">
+                        <p>
+                            Check Running Log:
+                            <a href="get-cdp-log/" class="alert-link">
+                                <u>http://135.251.216.181/{{user}}/ce-deploy/ce_deploy.log</u>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- padding -->
         <div style="height: 105px;"></div>
@@ -214,9 +235,39 @@
 
             function start_ce_deployment(){
                 $('#startCe').click(function(event){
-                    update_progress_bar();
-                    contact_server();
+                    if (check_pre_condition() == true){
+                        update_progress_bar();
+                        contact_server();
+                        get_cdp_log();
+                        disable_all_button()
+                    }
                 })
+            }
+
+            function check_pre_condition(){
+                if(
+                    $('#selectPak').val() == "Please Select One Pak"
+                ){
+                    alert("Please select one pak first!")
+                    return false
+                }
+                $.get("query-user-input/", function(data){
+                    // user input file did not uploaded
+                    if (data == "nok"){
+                        return false
+                    }
+                });
+                return true
+            }
+
+            function disable_all_button(){
+                $('#selectRel').attr("disabled","disabled");
+                $('#selectPak').attr("disabled","disabled");
+                $('#addFileBton').attr("disabled","disabled");
+                $('#addFileInput').attr("disabled","disabled");
+                $('#startCe').attr("disabled","disabled");
+                $('#continueCe').attr("disabled","disabled");
+                $('#stopCe').removeClass("disabled");
             }
 
             function update_progress_bar() {
@@ -229,7 +280,7 @@
                         if (data == "101") {
                             $('#progressOutter').removeClass("active");
                             $('#progressInner').css('width', '100%');
-                            $('#progressInner').removeClass("progress-bar-warning");
+                            $('#progressInner').removeClass("progress-bar-success");
                             $('#progressInner').addClass("progress-bar-danger");
                             $('#progressInner').html("Failed, Please check log!")
                             return
@@ -249,7 +300,6 @@
             }
 
             function contact_server(){
-
                 var userData = {
                     'selectRel':$('#selectRel').val(),
                     'selectPak':$('#selectPak').val()
@@ -262,6 +312,10 @@
                     // we can also use form serialize function
                     data: JSON.stringify(userData)
                 })
+            }
+
+            function get_cdp_log(){
+                $('#logfile').removeClass("fade");
             }
 
         </script>

@@ -32,10 +32,6 @@ def get_pak_list(pak_ip,
 
 def start_ce_deployment(uname, select_rel, select_pak):
 
-    print uname
-    print select_rel
-    print select_pak
-
     user_found = WebUser.objects.get(username=uname)
 
     work_dir = user_found.userWorkDir + "/ce_deploy_dir/"
@@ -45,25 +41,37 @@ def start_ce_deployment(uname, select_rel, select_pak):
         shutil.rmtree(work_dir)
         os.mkdir(work_dir)
 
-    # create log file and get user input file from /media
+    # create log file
     log_file = work_dir + '/ce_deploy.log'
     os.system(r'touch %s' % log_file)
 
+    # initial log setting
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s: %(message)s',
+                        datefmt='%a, %d %b %Y %H:%M:%S',
+                        filename=log_file,
+                        filemode='w')
+
+    # updage progress bar to 2%
+    user_found.progressBarData = "2"
+    user_found.save()
+
+    logging.info('start ce deployment')
+    logging.info('log file ready')
+
+    # log initial parameters for ce deployment
+    logging.info('\n'
+                 'Username is %s, \n'
+                 'Release is %s, \n'
+                 'Pak is %s \n'
+                 % (uname, select_rel, select_pak)
+                 )
+
+    # get user input file
     user_input_source = BASE_DIR + "/media/" + user_found.tmpPath + "/" + user_found.userInputFileName
     user_input_target = work_dir + user_found.userInputFileName
 
     shutil.move(user_input_source, user_input_target)
-
-
-    # logging.basicConfig(level=logging.DEBUG,
-    #                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-    #                     datefmt='%a, %d %b %Y %H:%M:%S',
-    #                     filename='/tmp/test.log',
-    #                     filemode='w')
-
-
-
-
 
 
 

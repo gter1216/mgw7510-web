@@ -6,14 +6,14 @@ from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from python_script import ce_deploy_scripts
 import os
-import logging
+# import logging
 import json
 import shutil
 
 
 # global var
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-logger = logging.getLogger("django")
+# logger = logging.getLogger("django")
 
 # Create your views here.
 
@@ -27,7 +27,7 @@ def index(request):
 
     # first par:  request
     # second par: auto search template path
-    logger.debug("This is an debug message by xuxiao: web user request home page")
+    # logger.debug("This is an debug message by xuxiao: web user request home page")
     return render(request,'index.html')
 
 # under construction page
@@ -92,7 +92,7 @@ def changePasswdOk(request):
 # regist a new web user
 def signup(request):
     if request.method == 'POST':
-        logger.debug("The sign up form is posted to django")
+        # logger.debug("The sign up form is posted to django")
 
         hp_uname = request.POST['username']
         hp_passwd = request.POST['password']
@@ -315,6 +315,8 @@ def uploadFile(request):
         user_found.userInputFileName = file_name
         user_found.save()
 
+        user_found.userInputUploadedFlag = "ok"
+
         files = [{'name': file_name}]
         data = {'files': files}
         jstr = json.dumps(data)
@@ -329,10 +331,8 @@ def updateProgress(request):
 
 
 def ceDeoployStart(request):
-    uname = request.session.get('username')
-
-    if uname:
-
+    if request.method == 'POST':
+        uname = request.session.get('username')
         # parse the json data from front-end
         user_data = json.loads(request.body)
 
@@ -341,6 +341,36 @@ def ceDeoployStart(request):
 
         ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
         return HttpResponse("ok")
+
+
+from django.utils.encoding import smart_str
+def getCdpLog(request):
+    if request.method == 'GET':
+
+        # directly send the log data to html
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        log_file = user_found.userWorkDir + "/ce_deploy_dir/" + "ce_deploy.log"
+        log_file_data = open(log_file, "rb").read()
+        return HttpResponse(log_file_data, content_type="text/plain")
+
+        # # download the log file
+        # uname = request.session.get('username')
+        # user_found = WebUser.objects.get(username=uname)
+        # file_name = "ce_deploy.log"
+        # path_to_file = user_found.userWorkDir + "/ce_deploy_dir/"
+        # response = HttpResponse(content_type='application/force-download')
+        # response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
+        # response['X-Sendfile'] = smart_str(path_to_file)
+        # return response
+
+def queryUserInput(request):
+    if request.method == 'GET':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        flag = user_found.userInputUploadedFlag
+        print flag
+        return HttpResponse(flag)
 
 
 

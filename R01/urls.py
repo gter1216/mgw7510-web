@@ -63,7 +63,8 @@ urlpatterns = [
     url(r'^ce-deploy/upload-file/$', 'mgw7510.views.uploadFile'),
     url(r'^ce-deploy/update-progress/$', 'mgw7510.views.updateProgress'),
     url(r'^ce-deploy/start/$', 'mgw7510.views.ceDeoployStart'),
-
+    url(r'^ce-deploy/get-cdp-log/$', 'mgw7510.views.getCdpLog'),
+    url(r'^ce-deploy/query-user-input/$', 'mgw7510.views.queryUserInput'),
 
 ]
 
