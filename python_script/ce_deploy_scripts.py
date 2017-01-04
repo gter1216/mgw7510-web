@@ -1,6 +1,12 @@
 from mgw7510.models import WebUser
 from pexpect import pxssh
+import logging
+import shutil
 import re
+import os
+
+# global var
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def get_pak_list(pak_ip,
                  pak_username,
@@ -34,8 +40,26 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     work_dir = user_found.userWorkDir + "/ce_deploy_dir/"
 
+    # remove all files under work dir
+    if os.path.isdir(work_dir):
+        shutil.rmtree(work_dir)
+        os.mkdir(work_dir)
+
+    # create log file and get user input file from /media
+    log_file = work_dir + '/ce_deploy.log'
+    os.system(r'touch %s' % log_file)
+
+    user_input_source = BASE_DIR + "/media/" + user_found.tmpPath + "/" + user_found.userInputFileName
+    user_input_target = work_dir + user_found.userInputFileName
+
+    shutil.move(user_input_source, user_input_target)
 
 
+    # logging.basicConfig(level=logging.DEBUG,
+    #                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    #                     datefmt='%a, %d %b %Y %H:%M:%S',
+    #                     filename='/tmp/test.log',
+    #                     filemode='w')
 
 
 
