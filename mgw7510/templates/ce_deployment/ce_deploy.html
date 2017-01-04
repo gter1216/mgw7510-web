@@ -177,8 +177,8 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-{#                get_pak_list();#}
-                update_progress_bar();
+                get_pak_list();
+                start_ce_deployment();
             });
 
             function get_pak_list(){
@@ -207,39 +207,46 @@
                 })
             } //function get_pak_list()
 
+
+            function start_ce_deployment(){
+                $('#startCe').click(function(event){
+                    update_progress_bar();
+
+{#                    $.post()#}
+
+                })
+            }
+
             function update_progress_bar() {
 
-                $('#startCe').click(function(event){
+                $('#progressOutter').removeClass("fade");
 
-                    $('#progressOutter').removeClass("fade");
+                var progresspump = setInterval(function () {
+                    $.get("update-progress/", function (data) {
+                        // if failed, the data is 101
+                        if (data == "101") {
+                            $('#progressOutter').removeClass("active");
+                            $('#progressInner').css('width', '100%');
+                            $('#progressInner').removeClass("progress-bar-warning");
+                            $('#progressInner').addClass("progress-bar-danger");
+                            $('#progressInner').html("Failed, Please check log!")
+                            return
+                        }
 
-                    var progresspump = setInterval(function () {
-                        $.get("update-progress/", function (data) {
+                        $('#progressInner').css('width', data + '%');
+                        $('#progressInner').html(data + '%');
 
-                            // if failed, the data is 101
-                            if (data=="101"){
-                                $('#progressOutter').removeClass("active");
-                                $('#progressInner').css('width', '100%');
-                                $('#progressInner').removeClass("progress-bar-warning");
-                                $('#progressInner').addClass("progress-bar-danger");
-                                $('#progressInner').html("Failed, Please check log!")
-                                return
-                            }
-
-                            $('#progressInner').css('width', data + '%');
-                            $('#progressInner').html(data + '%');
-
-                            if (data > 99.999) {
-                                clearInterval(progresspump);
-                                $('#progressOutter').removeClass("active");
-                                $('#progressInner').html("Success Done!")
-                                return
-                            }
-                        })
-                    }, 1000) // var progresspump
-                })
-
+                        if (data > 99.999) {
+                            clearInterval(progresspump);
+                            $('#progressOutter').removeClass("active");
+                            $('#progressInner').html("Success Done!")
+                            return
+                        }
+                    })
+                }, 1000); // var progresspump
             }
+
+
 
         </script>
 
