@@ -133,7 +133,6 @@ def loginIn(request, loginParam):
     return render(request, 'login_in.html', {'user':loginParam})
 
 def logout(request):
-
     # delete the cookies
     try:
         del request.session['username']
@@ -248,7 +247,6 @@ def saveConfig(request):
 
 # request an home page for ce deploy
 def ceDeploy(request):
-
     if request.session.get("ce_deploy_state") == "ongoing":
         # there is an ongoing task
         uname = request.session.get('username')
@@ -256,7 +254,19 @@ def ceDeploy(request):
         select_rel = request.session.get('selectRel')
         select_pak = request.session.get('selectPak')
         user_input_file_name = user_found.userInputFileName
-        return render(request, 'ce_deployment/ce_deploy_ongoing.html', {'user': uname,
+
+        return render(request, 'ce_deployment/ce_deploy_onging.html', {'user': uname,
+                                                                       'selectRel': select_rel,
+                                                                       'selectPak': select_pak,
+                                                                       'userInputFileName': user_input_file_name})
+
+    elif request.session.get("ce_deploy_state") == "stopped":
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        select_rel = request.session.get('selectRel')
+        select_pak = request.session.get('selectPak')
+        user_input_file_name = user_found.userInputFileName
+        return render(request, 'ce_deployment/ce_deploy_stopped.html', {'user': uname,
                                                                         'selectRel': select_rel,
                                                                         'selectPak': select_pak,
                                                                         'userInputFileName': user_input_file_name})
@@ -342,7 +352,8 @@ def updateProgress(request):
     if request.method == 'GET':
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
-        return HttpResponse(user_found.progressBarData)
+        progress = user_found.progressBarData
+        return HttpResponse(progress)
 
 
 def ceDeoployStart(request):
@@ -356,12 +367,25 @@ def ceDeoployStart(request):
 
         ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
-        # set cookie; write username into cookie, valid timer is 3600s
+        # set cookie;
         request.session['ce_deploy_state'] = "ongoing"
         request.session['selectRel'] = select_rel
         request.session['selectPak'] = select_pak
+
         return HttpResponse("ok")
 
+def ceDeoployStop(request):
+    if request.method == 'GET':
+        request.session['ce_deploy_state'] = "stopped"
+        return HttpResponse("ok")
+
+
+def ceDeoployReset(request):
+    if request.method == 'GET':
+        del request.session['ce_deploy_state']
+        del request.session['selectRel']
+        del request.session['selectPak']
+        return HttpResponseRedirect('/ce-deploy/')
 
 def getCdpLog(request):
     if request.method == 'GET':

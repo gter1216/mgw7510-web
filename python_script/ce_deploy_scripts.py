@@ -52,9 +52,6 @@ def start_ce_deployment(uname, select_rel, select_pak):
                         filename=log_file,
                         filemode='w')
 
-    # updage progress bar to 2%
-    user_found.progressBarData = "2"
-    user_found.save()
 
     logging.info('start ce deployment')
     logging.info('log file ready')
@@ -67,11 +64,15 @@ def start_ce_deployment(uname, select_rel, select_pak):
                  % (uname, select_rel, select_pak)
                  )
 
-    # get user input file
-    user_input_source = BASE_DIR + "/media/" + user_found.tmpPath + "/" + user_found.userInputFileName
-    user_input_target = work_dir + user_found.userInputFileName
+    # updage progress bar to 2%
+    user_found.progressBarData = "10"
+    user_found.save()
 
-    shutil.move(user_input_source, user_input_target)
+    # get user input file
+    # user_input_source = BASE_DIR + "/media/" + user_found.tmpPath + "/" + user_found.userInputFileName
+    # user_input_target = work_dir + user_found.userInputFileName
+    #
+    # shutil.move(user_input_source, user_input_target)
 
 
 

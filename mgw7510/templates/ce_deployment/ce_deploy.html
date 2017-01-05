@@ -156,17 +156,11 @@
                     <button type="button" id="resetCe" class="btn btn-warning btn-block col-lg-2 disabled">Reset</button>
                 </div>
             </div>
-            <div style="height: 20px;"></div>
-            <div class="row" style="margin-left:0.1%">
-                <div class="col-lg-6">
-                    <div class="progress progress-striped active fade" id="progressOutter">
-                        <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div style="height: 10px;"></div>
+
+        <div style="height: 30px;"></div>
 
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
@@ -174,10 +168,20 @@
                     <div class="alert alert-dismissible alert-warning fade" id="logfile">
                         <p>
                             Check Running Log:
+                        </p>
+                        <p>
                             <a href="get-cdp-log/" class="alert-link">
                                 <u>http://135.251.216.181/{{user}}/ce-deploy/ce_deploy.log</u>
                             </a>
                         </p>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 5px;"></div>
+            <div class="row" style="margin-left:0.1%">
+                <div class="col-lg-8">
+                    <div class="progress progress-striped active fade" id="progressOutter">
+                        <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -204,6 +208,21 @@
             $(document).ready(function(){
                 get_pak_list();
                 start_ce_deployment();
+                $('#stopCe').click(function(event){
+                    clearInterval(progresspump);
+                    $('#progressOutter').removeClass("active");
+                    $('#progressInner').html("Stopped!");
+                    $('#progressInner').removeClass("progress-bar-success");
+                    $('#progressInner').addClass("progress-bar-danger");
+                    $('#resetCe').removeClass("disabled");
+                    $('#stopCe').attr("disabled","disabled");
+                    $.get("stop/", function (data) {
+                        // notify server stop button clicked
+                    })
+                });
+                $('#resetCe').click(function (event) {
+                    window.location.href = "reset/"
+                })
             });
 
             function get_pak_list(){
@@ -269,7 +288,7 @@
 
                 $('#progressOutter').removeClass("fade");
 
-                var progresspump = setInterval(function () {
+                progresspump = setInterval(function () {
                     $.get("update-progress/", function (data) {
                         // if failed, the data is 101
                         if (data == "101") {
@@ -319,7 +338,6 @@
                 $('#addFileBton').attr("disabled","disabled");
                 $('#addFileInput').attr("disabled","disabled");
                 $('#startCe').attr("disabled","disabled");
-                $('#resetCe').attr("disabled","disabled");
                 $('#stopCe').removeClass("disabled");
             }
 
