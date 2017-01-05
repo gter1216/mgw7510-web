@@ -249,21 +249,37 @@ def saveConfig(request):
 # request an home page for ce deploy
 def ceDeploy(request):
 
-    # if user logged
-    uname = request.session.get('username')
-    if uname:
-
+    if request.session.get("ce_deploy_state") == "ongoing":
+        # there is an ongoing task
+        uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
-
-        # if ce_deploydir not exist, then create it
-        user_work_dir = user_found.userWorkDir
-        user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
-        if not os.path.isdir(user_ce_deploy_dir):
-            os.mkdir(user_ce_deploy_dir)
-
-        return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
+        select_rel = request.session.get('selectRel')
+        select_pak = request.session.get('selectPak')
+        user_input_file_name = user_found.userInputFileName
+        return render(request, 'ce_deployment/ce_deploy_ongoing.html', {'user': uname,
+                                                                        'selectRel': select_rel,
+                                                                        'selectPak': select_pak,
+                                                                        'userInputFileName': user_input_file_name})
     else:
-        return HttpResponse("please login in first!")
+        # if user logged
+        uname = request.session.get('username')
+        if uname:
+
+            user_found = WebUser.objects.get(username=uname)
+
+            # if ce_deploydir not exist, then create it
+            user_work_dir = user_found.userWorkDir
+            user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
+            if not os.path.isdir(user_ce_deploy_dir):
+                os.mkdir(user_ce_deploy_dir)
+
+            # clear flag
+            user_found.userInputUploadedFlag = "nok"
+            user_found.save()
+
+            return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
+        else:
+            return HttpResponse("please login in first!")
 
 # ce deploy process function
 def ceCheckPak(request):
@@ -313,9 +329,8 @@ def uploadFile(request):
         user_found.userInputFile = request.FILES['userInputFile']
         file_name = request.FILES['userInputFile'].name
         user_found.userInputFileName = file_name
-        user_found.save()
-
         user_found.userInputUploadedFlag = "ok"
+        user_found.save()
 
         files = [{'name': file_name}]
         data = {'files': files}
@@ -340,10 +355,14 @@ def ceDeoployStart(request):
         select_pak = user_data['selectPak']
 
         ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
+
+        # set cookie; write username into cookie, valid timer is 3600s
+        request.session['ce_deploy_state'] = "ongoing"
+        request.session['selectRel'] = select_rel
+        request.session['selectPak'] = select_pak
         return HttpResponse("ok")
 
 
-from django.utils.encoding import smart_str
 def getCdpLog(request):
     if request.method == 'GET':
 
@@ -369,7 +388,6 @@ def queryUserInput(request):
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
         flag = user_found.userInputUploadedFlag
-        print flag
         return HttpResponse(flag)
 
 
