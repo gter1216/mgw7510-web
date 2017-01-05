@@ -143,34 +143,30 @@
             </div>
         </div>
 
-
-{#        <tr class="template-download fade">#}
-{#            <td>#}
-{#                <span class="preview">#}
-{#                        <a  title="{{userInputFileName}}"  data-gallery></a>#}
-{#                </span>#}
-{#            </td>#}
-{#            <td>#}
-{#                <p class="name">#}
-{#                    <span>{{userInputFileName}}</span>#}
-{#                </p>#}
-{#            </td>#}
-{#            <td>#}
-{#                <span class="size">{%=o.formatFileSize(file.size)%}</span>#}
-{#            </td>#}
-{#            <td>#}
-{#                {% if (file.deleteUrl) { %}#}
-{#                    <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>#}
-{#                        <i class="glyphicon glyphicon-trash"></i>#}
-{#                        <span>Delete</span>#}
-{#                    </button>#}
-{#                    <input type="checkbox" name="delete" value="1" class="toggle">#}
-{#                {% } else { %}#}
-{##}
-{#                {% } %}#}
-{#            </td>#}
-{#        </tr>#}
-
+        <div class="container-fluid">
+            <div class="col-lg-7" style="margin-left: 1%">
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="preview">
+                                            <a  title="{{userInputFileName}}"  data-gallery></a>
+                                    </span>
+                                </td>
+                                <td>
+                                    <p class="name">
+                                        <span>{{userInputFileName}}</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
 
         <div style="height: 30px;"></div>
@@ -191,25 +187,25 @@
         <div style="height: 30px;"></div>
 
         <div class="container-fluid">
-            <div class="row" style="margin-left:0.1%">
-                <div class = "col-lg-8">
-                    <div class="alert alert-dismissible alert-warning" id="logfile">
-                        <p>
-                            Check Running Log:
-                        </p>
-                        <p>
-                            <a href="get-cdp-log/" class="alert-link">
-                                <u>http://135.251.216.181/{{user}}/ce-deploy/ce_deploy.log</u>
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
             <div style="height: 5px;"></div>
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-8">
                     <div class="progress progress-striped active" id="progressOutter">
                         <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-left:0.1%">
+                <div class = "col-lg-8">
+                    <div class="alert alert-dismissible alert-warning fade" id="logfile">
+                        <p>
+                            Check Running Log:
+                        </p>
+                        <p>
+                            <a href="get-cdp-log/" class="alert-link" target="_blank">
+                                <u>http://135.251.216.181/{{user}}/ce-deploy/ce_deploy.log</u>
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -238,7 +234,7 @@
                 //start_ce_deployment();
 
                 update_progress_bar();
-                get_cdp_log();
+                //get_cdp_log();
                 handle_button_state();
                 $('#stopCe').click(function(event){
                     clearInterval(progresspump);
@@ -250,7 +246,8 @@
                     $('#stopCe').attr("disabled","disabled");
                     $.get("stop/", function (data) {
                         // notify server stop button clicked
-                    })
+                    });
+                    get_cdp_log()
                 })
                 $('#resetCe').click(function (event) {
                     window.location.href = "reset/"

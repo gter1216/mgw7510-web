@@ -16,6 +16,25 @@ User Administration function is finished, including:
    3. forget password
    4. session and cookies based on user
 
+Updated at 2017.1.5
+Three bugs need to be fixed in future:
+1. After click log out, then click backup button in the browser, 
+   and finally a login-in page is displayed which is not expected.
+
+   so, refresh the page is needed when click backup button on bowser.
+   Same problem occurred on ce_deploy start/stop.
+
+2. The log file "text/plain"  will be downloaded instead of displayed 
+   on the browser. ( step1. use chrome, click start. 
+                     step2. click refresh
+                     step3. click stop
+                     step4. click log
+
+3. No content will be displayed on the log
+
+
+
+
 ####################   ROAD MAP  ##############################
 1. Auto deployment for CE is under developing by Xu Xiao.
 2. Auto deployment for HE is under developing by Zhao Peng.

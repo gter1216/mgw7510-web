@@ -281,7 +281,22 @@ def ceDeploy(request):
             user_work_dir = user_found.userWorkDir
             user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
             if not os.path.isdir(user_ce_deploy_dir):
+                # print "/UserWorkDir/user/ce_deploy_dir is not dir, need create"
                 os.mkdir(user_ce_deploy_dir)
+                # print "/UserWorkDir/user/ce_deploy_dir has been created"
+
+                user_upload_file_dir = user_ce_deploy_dir + "/UserUploadDir"
+                if not os.path.isdir(user_upload_file_dir):
+                    # print "/UserWorkDir/user/ce_deploy_dir/UserUploadDir is not dir, need create"
+                    os.mkdir(user_upload_file_dir)
+                    # print "/UserWorkDir/user/ce_deploy_dir/UserUploadDir has been created"
+
+                # create log file
+                log_file = user_ce_deploy_dir + '/ce_deploy.log'
+                if not os.path.isfile(log_file):
+                    # print "/UserWorkDir/user/ce_deploy_dir/ce_deploy.log not exist, need create"
+                    os.system(r'touch %s' % log_file)
+                    # print "/UserWorkDir/user/ce_deploy_dir/ce_deploy.log has been created"
 
             # clear flag
             user_found.userInputUploadedFlag = "nok"
@@ -365,12 +380,12 @@ def ceDeoployStart(request):
         select_rel = user_data['selectRel']
         select_pak = user_data['selectPak']
 
-        ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
-
         # set cookie;
         request.session['ce_deploy_state'] = "ongoing"
         request.session['selectRel'] = select_rel
         request.session['selectPak'] = select_pak
+
+        ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
         return HttpResponse("ok")
 
@@ -394,7 +409,10 @@ def getCdpLog(request):
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
         log_file = user_found.userWorkDir + "/ce_deploy_dir/" + "ce_deploy.log"
-        log_file_data = open(log_file, "rb").read()
+        # return HttpResponse("OK")
+        fo = open(log_file, "r")
+        log_file_data = fo.read()
+        fo.close()
         return HttpResponse(log_file_data, content_type="text/plain")
 
         # # download the log file

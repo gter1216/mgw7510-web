@@ -185,5 +185,5 @@ DEFAULT_FROM_EMAIL = '<no-reply@sbc.nokia.com>'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
+SECURE_CONTENT_TYPE_NOSNIFF = True
 

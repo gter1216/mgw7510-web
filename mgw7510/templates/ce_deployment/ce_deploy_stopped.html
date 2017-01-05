@@ -171,6 +171,31 @@
 {#            </td>#}
 {#        </tr>#}
 
+        <div class="container-fluid">
+            <div class="col-lg-7" style="margin-left: 1%">
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="preview">
+                                            <a  title="{{userInputFileName}}"  data-gallery></a>
+                                    </span>
+                                </td>
+                                <td>
+                                    <p class="name">
+                                        <span>{{userInputFileName}}</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
 
 
         <div style="height: 30px;"></div>
@@ -191,6 +216,14 @@
         <div style="height: 30px;"></div>
 
         <div class="container-fluid">
+            <div style="height: 5px;"></div>
+            <div class="row" style="margin-left:0.1%">
+                <div class="col-lg-8">
+                    <div class="progress progress-striped active" id="progressOutter">
+                        <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
             <div class="row" style="margin-left:0.1%">
                 <div class = "col-lg-8">
                     <div class="alert alert-dismissible alert-warning" id="logfile">
@@ -198,18 +231,10 @@
                             Check Running Log:
                         </p>
                         <p>
-                            <a href="get-cdp-log/" class="alert-link">
+                            <a href="get-cdp-log/" class="alert-link" target="_blank">
                                 <u>http://135.251.216.181/{{user}}/ce-deploy/ce_deploy.log</u>
                             </a>
                         </p>
-                    </div>
-                </div>
-            </div>
-            <div style="height: 5px;"></div>
-            <div class="row" style="margin-left:0.1%">
-                <div class="col-lg-8">
-                    <div class="progress progress-striped active" id="progressOutter">
-                        <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
