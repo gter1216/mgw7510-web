@@ -32,7 +32,7 @@ Three bugs need to be fixed in future:
 
 3. No content will be displayed on the log
 
-
+4. when click stop button, should kill the ongoing process and wait 2 seconds to get the log
 
 
 ####################   ROAD MAP  ##############################

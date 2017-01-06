@@ -39,12 +39,13 @@ def start_ce_deployment(uname, select_rel, select_pak):
     log_file = work_dir + "/ce_deploy.log"
 
     # clear log_file
-    log_file_cmd1 = "rm -rf %s" % log_file
-    log_file_cmd2 = "touch %s" % log_file
-    os.system(log_file_cmd1)
-    os.system(log_file_cmd2)
-
-    time.sleep(5)
+    # log_file_cmd1 = "rm -rf %s" % log_file
+    # log_file_cmd2 = "touch %s" % log_file
+    # os.system(log_file_cmd1)
+    # os.system(log_file_cmd2)
+    #
+    # # wait enough time for the log file is touched.
+    # time.sleep(0.5)
 
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s: %(message)s',

@@ -27,6 +27,10 @@ class WebUserForm(ModelForm):
     progressBarData = forms.CharField(required=False)
     userInputUploadedFlag = forms.CharField(required=False)
 
+    ceDeployState = forms.CharField(required=False)
+    ceSelectRel = forms.CharField(required=False)
+    ceSelectPak = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'

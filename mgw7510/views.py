@@ -5,10 +5,11 @@ from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from python_script import ce_deploy_scripts
+import shutil
+import time
+import json
 import os
 # import logging
-import json
-import shutil
 
 
 # global var
@@ -247,34 +248,35 @@ def saveConfig(request):
 
 # request an home page for ce deploy
 def ceDeploy(request):
-    if request.session.get("ce_deploy_state") == "ongoing":
-        # there is an ongoing task
-        uname = request.session.get('username')
+    uname = request.session.get('username')
+
+    if uname:
         user_found = WebUser.objects.get(username=uname)
-        select_rel = request.session.get('selectRel')
-        select_pak = request.session.get('selectPak')
-        user_input_file_name = user_found.userInputFileName
+        state = user_found.ceDeployState
 
-        return render(request, 'ce_deployment/ce_deploy_onging.html', {'user': uname,
-                                                                       'selectRel': select_rel,
-                                                                       'selectPak': select_pak,
-                                                                       'userInputFileName': user_input_file_name})
+        if state == "ongoing":
+            # there is an ongoing task
+            user_found = WebUser.objects.get(username=uname)
+            select_rel = user_found.ceSelectRel
+            select_pak = user_found.ceSelectPak
+            user_input_file_name = user_found.userInputFileName
 
-    elif request.session.get("ce_deploy_state") == "stopped":
-        uname = request.session.get('username')
-        user_found = WebUser.objects.get(username=uname)
-        select_rel = request.session.get('selectRel')
-        select_pak = request.session.get('selectPak')
-        user_input_file_name = user_found.userInputFileName
-        return render(request, 'ce_deployment/ce_deploy_stopped.html', {'user': uname,
-                                                                        'selectRel': select_rel,
-                                                                        'selectPak': select_pak,
-                                                                        'userInputFileName': user_input_file_name})
-    else:
-        # if user logged
-        uname = request.session.get('username')
-        if uname:
+            return render(request, 'ce_deployment/ce_deploy_onging.html', {'user': uname,
+                                                                           'selectRel': select_rel,
+                                                                           'selectPak': select_pak,
+                                                                           'userInputFileName': user_input_file_name})
 
+        elif state == "stopped":
+            user_found = WebUser.objects.get(username=uname)
+            select_rel = user_found.ceSelectRel
+            select_pak = user_found.ceSelectPak
+            user_input_file_name = user_found.userInputFileName
+            return render(request, 'ce_deployment/ce_deploy_stopped.html', {'user': uname,
+                                                                            'selectRel': select_rel,
+                                                                            'selectPak': select_pak,
+                                                                            'userInputFileName': user_input_file_name})
+        elif state == "initial":
+            # if user logged
             user_found = WebUser.objects.get(username=uname)
 
             # if ce_deploydir not exist, then create it
@@ -303,8 +305,8 @@ def ceDeploy(request):
             user_found.save()
 
             return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
-        else:
-            return HttpResponse("please login in first!")
+    else:
+        return HttpResponse("please login in first!")
 
 # ce deploy process function
 def ceCheckPak(request):
@@ -374,16 +376,22 @@ def updateProgress(request):
 def ceDeoployStart(request):
     if request.method == 'POST':
         uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
         # parse the json data from front-end
         user_data = json.loads(request.body)
 
         select_rel = user_data['selectRel']
         select_pak = user_data['selectPak']
 
-        # set cookie;
-        request.session['ce_deploy_state'] = "ongoing"
-        request.session['selectRel'] = select_rel
-        request.session['selectPak'] = select_pak
+        # # set cookie;
+        # request.session['ce_deploy_state'] = [uname, "ongoing"]
+        # request.session['selectRel'] = select_rel
+        # request.session['selectPak'] = select_pak
+
+        user_found.ceDeployState = "ongoing"
+        user_found.ceSelectRel = select_rel
+        user_found.ceSelectPak = select_pak
+        user_found.save()
 
         ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
@@ -391,15 +399,19 @@ def ceDeoployStart(request):
 
 def ceDeoployStop(request):
     if request.method == 'GET':
-        request.session['ce_deploy_state'] = "stopped"
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        user_found.ceDeployState = "stopped"
+        user_found.save()
         return HttpResponse("ok")
 
 
 def ceDeoployReset(request):
     if request.method == 'GET':
-        del request.session['ce_deploy_state']
-        del request.session['selectRel']
-        del request.session['selectPak']
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        user_found.ceDeployState = "initial"
+        user_found.save()
         return HttpResponseRedirect('/ce-deploy/')
 
 def getCdpLog(request):
@@ -410,6 +422,9 @@ def getCdpLog(request):
         user_found = WebUser.objects.get(username=uname)
         log_file = user_found.userWorkDir + "/ce_deploy_dir/" + "ce_deploy.log"
         # return HttpResponse("OK")
+
+        # wait enough time to wait for the log file is ready
+        time.sleep(0.5)
         fo = open(log_file, "r")
         log_file_data = fo.read()
         fo.close()

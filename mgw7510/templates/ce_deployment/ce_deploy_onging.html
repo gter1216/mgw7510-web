@@ -176,10 +176,10 @@
                     <button type="button" id="startCe" class="btn btn-primary btn-block col-lg-2">Start</button>
                 </div>
                 <div class="col-lg-1">
-                    <button type="button" id="stopCe" class="btn btn-danger btn-block col-lg-2 disabled">Stop</button>
+                    <button type="button" id="stopCe" disabled="disabled" class="btn btn-danger btn-block col-lg-2">Stop</button>
                 </div>
                 <div class="col-lg-1">
-                    <button type="button" id="resetCe" class="btn btn-warning btn-block col-lg-2 disabled">Reset</button>
+                    <button type="button" id="resetCe" disabled="disabled" class="btn btn-warning btn-block col-lg-2">Reset</button>
                 </div>
             </div>
         </div>
@@ -242,7 +242,7 @@
                     $('#progressInner').html("Stopped!");
                     $('#progressInner').removeClass("progress-bar-success");
                     $('#progressInner').addClass("progress-bar-danger");
-                    $('#resetCe').removeClass("disabled");
+                    $('#resetCe').removeAttr("disabled");
                     $('#stopCe').attr("disabled","disabled");
                     $.get("stop/", function (data) {
                         // notify server stop button clicked
@@ -369,7 +369,7 @@
                 $('#addFileInput').attr("disabled","disabled");
                 $('#startCe').attr("disabled","disabled");
 {#                $('#resetCe').attr("disabled","disabled");#}
-                $('#stopCe').removeClass("disabled");
+                $('#stopCe').removeAttr("disabled");
             }
 
         </script>
