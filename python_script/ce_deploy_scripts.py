@@ -118,7 +118,6 @@ def start_ce_deployment(uname, select_rel, select_pak):
                 "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
 
         logging.info('\ncmd is: %s \n' % cmd1)
-
         s.sendline(cmd1)
         s.prompt()
 
@@ -126,6 +125,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
         s.prompt()
         logging.info('\nls is: %s \n' % s.before)
 
+        s.sendline('scp ')
         s.logout()
 
 
