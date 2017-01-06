@@ -68,7 +68,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
     user_found.progressBarData = "10"
     user_found.save()
 
-    #remove old user input files
+    #remove all old files in UserUploadDir
     user_upload_dir = work_dir + "/UserUploadDir"
     user_input_file_name = user_found.userInputFileName
     if os.path.isdir(user_upload_dir):
@@ -82,12 +82,69 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     logging.info('\nuser uploaded file "%s" is ready to use \n\n' % user_input_file_name)
 
-    return
+    ###############################################################################
+    ##### step1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer
+    ################################################################################
+    logging.info('\nStep1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer \n')
+    pak_server_ip = user_found.pakServerIp
+    pak_server_username = user_found.pakServerUsername
+    pak_server_password = user_found.pakServerPasswd
+    pak_server_fp = user_found.pakServerFp
+
+    logging.info('\n'
+                 'pak server ip is %s, \n'
+                 'pak server username is %s, \n'
+                 'pak server password is is %s \n' % (pak_server_ip, pak_server_username, pak_server_password))
+
+    # target path is ===> user_upload_dir
+
+    # get source path
+    # find ./ -name "nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2"
+    # -exec bash -c 'scp -a `dirname {}` ./xuxiao ' \;
+    # find /viewstores/public/SLP/7510C71 -name "nokia-mgw-rhel7.2-3.10.0-327.18.2-2.ae1b0416.x86_64.qcow2" -exec bash -c 'dirname {}' \;
+    # /viewstores/public/SLP/7510C71/A7510_C71_11_04_2016_ae1b0416
+
+    try:
+        logging.info('\nssh to pak server \n')
+        s = pxssh.pxssh()
+        s.login(pak_server_ip, pak_server_username, pak_server_password, original_prompt='[$#>]')
+
+        # cmd1 = 'find ' + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
+        #        "-name " + select_pak + " -exec bash -c " + " 'dirname {}' " + '\\;'
+
+        # cd `find /viewstores/public/SLP/7510C71/ -name nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2 -exec dirname {} \;`
+
+        cmd1 = "cd " + "`" + "find " + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
+                "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
+
+        logging.info('\ncmd is: %s \n' % cmd1)
+
+        s.sendline(cmd1)
+        s.prompt()
+
+        s.sendline('ls')
+        s.prompt()
+        logging.info('\nls is: %s \n' % s.before)
+
+        s.logout()
 
 
-    ###########################################################
-    ##### first step:
-    ###########################################################
+    except pxssh.ExceptionPxssh, e:
+        # updage progress bar to 101%, failed
+        logging.error('\nfailed ssh to pak server \n')
+        user_found.progressBarData = "101"
+        user_found.save()
+        return
+
+
+
+
+
+
+
+
+
+
 
 
 
