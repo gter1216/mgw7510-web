@@ -28,51 +28,51 @@ SECRET_KEY = 'ecpcpap(0qg^qfxou)bpx3lnbw9*hrm661grilzzmsolq*e10o'
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 DEBUG = True
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        }, # used when DEBUG = True
-    },
-    'formatters': {
-        'standard': {
-            'format': '%(levelname)s %(asctime)s %(pathname)s %(filename)s %(module)s %(funcName)s %(lineno)d: %(message)s'
-        }, # INFO 2016-09-03 16:25:20,067 /home/ubuntu/mysite/views.py views.py views get 29: some info...
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-             'formatter':'standard'
-        },
-        'file_handler': {
-             'level': 'DEBUG',
-             'class': 'logging.handlers.TimedRotatingFileHandler',
-             'filename': '/home/projects/mgw7510_webserver/R01/log/django.log',
-             'formatter':'standard'
-        }, # log file path
-        'console':{
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers' :['file_handler', 'console'],
-            'level':'DEBUG',
-            'propagate': True # whether to inherit log of parent class
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-    }
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'filters': {
+#         'require_debug_true': {
+#             '()': 'django.utils.log.RequireDebugTrue',
+#         }, # used when DEBUG = True
+#     },
+#     'formatters': {
+#         'standard': {
+#             'format': '%(levelname)s %(asctime)s %(pathname)s %(filename)s %(module)s %(funcName)s %(lineno)d: %(message)s'
+#         }, # INFO 2016-09-03 16:25:20,067 /home/ubuntu/mysite/views.py views.py views get 29: some info...
+#     },
+#     'handlers': {
+#         'mail_admins': {
+#             'level': 'ERROR',
+#             'class': 'django.utils.log.AdminEmailHandler',
+#              'formatter':'standard'
+#         },
+#         'file_handler': {
+#              'level': 'DEBUG',
+#              'class': 'logging.handlers.TimedRotatingFileHandler',
+#              'filename': '/home/projects/mgw7510_webserver/R01/log/django.log',
+#              'formatter':'standard'
+#         }, # log file path
+#         'console':{
+#             'level': 'INFO',
+#             'filters': ['require_debug_true'],
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'standard'
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers' :['file_handler', 'console'],
+#             'level':'DEBUG',
+#             'propagate': True # whether to inherit log of parent class
+#         },
+#         'django.request': {
+#             'handlers': ['mail_admins'],
+#             'level': 'ERROR',
+#             'propagate': False,
+#         },
+#     }
+# }
 
 
 # How to use log in the code
@@ -185,5 +185,5 @@ DEFAULT_FROM_EMAIL = '<no-reply@sbc.nokia.com>'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
+SECURE_CONTENT_TYPE_NOSNIFF = True
 

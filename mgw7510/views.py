@@ -5,15 +5,16 @@ from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from python_script import ce_deploy_scripts
-import os
-import logging
-import json
 import shutil
+import time
+import json
+import os
+# import logging
 
 
 # global var
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-logger = logging.getLogger("django")
+# logger = logging.getLogger("django")
 
 # Create your views here.
 
@@ -27,7 +28,7 @@ def index(request):
 
     # first par:  request
     # second par: auto search template path
-    logger.debug("This is an debug message by xuxiao: web user request home page")
+    # logger.debug("This is an debug message by xuxiao: web user request home page")
     return render(request,'index.html')
 
 # under construction page
@@ -92,7 +93,7 @@ def changePasswdOk(request):
 # regist a new web user
 def signup(request):
     if request.method == 'POST':
-        logger.debug("The sign up form is posted to django")
+        # logger.debug("The sign up form is posted to django")
 
         hp_uname = request.POST['username']
         hp_passwd = request.POST['password']
@@ -133,7 +134,6 @@ def loginIn(request, loginParam):
     return render(request, 'login_in.html', {'user':loginParam})
 
 def logout(request):
-
     # delete the cookies
     try:
         del request.session['username']
@@ -204,22 +204,107 @@ def forgetPasswd(request):
     else:
         return HttpResponse('not post method')
 
-# request an home page for ce deploy
-def ceDeploy(request):
-
+def settings(request):
     # if user logged
     uname = request.session.get('username')
     if uname:
+        return render(request, 'settings.html', {'user': uname})
+    else:
+        return HttpResponse("please login in first!")
 
+def getCurrentConfig(request):
+    uname = request.session.get('username')
+    if uname:
         user_found = WebUser.objects.get(username=uname)
 
-        # if ce_deploydir not exist, then create it
-        user_work_dir = user_found.userWorkDir
-        user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
-        if not os.path.isdir(user_ce_deploy_dir):
-            os.mkdir(user_ce_deploy_dir)
+        config_data = {'pakServerIp': user_found.pakServerIp, 'pakServerUsername': user_found.pakServerUsername,
+                       'pakServerPasswd': user_found.pakServerPasswd, 'pakServerFp': user_found.pakServerFp}
 
-        return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
+    jstr = json.dumps(config_data)
+
+    return HttpResponse(jstr, content_type='application/json')
+
+def saveConfig(request):
+    uname = request.session.get('username')
+
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+
+        # parse the json data from front-end
+        new_config_data = json.loads(request.body)
+
+        user_found.pakServerIp = new_config_data['pakServerIp']
+        user_found.pakServerUsername = new_config_data['pakServerUsername']
+        user_found.pakServerPasswd = new_config_data['pakServerPasswd']
+        user_found.pakServerFp = new_config_data['pakServerFp']
+
+        user_found.save()
+
+        return HttpResponse('ok')
+
+    else:
+        return HttpResponse('user not found')
+
+
+# request an home page for ce deploy
+def ceDeploy(request):
+    uname = request.session.get('username')
+
+    if uname:
+        user_found = WebUser.objects.get(username=uname)
+        state = user_found.ceDeployState
+
+        if state == "ongoing":
+            # there is an ongoing task
+            user_found = WebUser.objects.get(username=uname)
+            select_rel = user_found.ceSelectRel
+            select_pak = user_found.ceSelectPak
+            user_input_file_name = user_found.userInputFileName
+
+            return render(request, 'ce_deployment/ce_deploy_onging.html', {'user': uname,
+                                                                           'selectRel': select_rel,
+                                                                           'selectPak': select_pak,
+                                                                           'userInputFileName': user_input_file_name})
+
+        elif state == "stopped":
+            user_found = WebUser.objects.get(username=uname)
+            select_rel = user_found.ceSelectRel
+            select_pak = user_found.ceSelectPak
+            user_input_file_name = user_found.userInputFileName
+            return render(request, 'ce_deployment/ce_deploy_stopped.html', {'user': uname,
+                                                                            'selectRel': select_rel,
+                                                                            'selectPak': select_pak,
+                                                                            'userInputFileName': user_input_file_name})
+        elif state == "initial":
+            # if user logged
+            user_found = WebUser.objects.get(username=uname)
+
+            # if ce_deploydir not exist, then create it
+            user_work_dir = user_found.userWorkDir
+            user_ce_deploy_dir = user_work_dir + "/ce_deploy_dir"
+            if not os.path.isdir(user_ce_deploy_dir):
+                # print "/UserWorkDir/user/ce_deploy_dir is not dir, need create"
+                os.mkdir(user_ce_deploy_dir)
+                # print "/UserWorkDir/user/ce_deploy_dir has been created"
+
+                user_upload_file_dir = user_ce_deploy_dir + "/UserUploadDir"
+                if not os.path.isdir(user_upload_file_dir):
+                    # print "/UserWorkDir/user/ce_deploy_dir/UserUploadDir is not dir, need create"
+                    os.mkdir(user_upload_file_dir)
+                    # print "/UserWorkDir/user/ce_deploy_dir/UserUploadDir has been created"
+
+                # create log file
+                log_file = user_ce_deploy_dir + '/ce_deploy.log'
+                if not os.path.isfile(log_file):
+                    # print "/UserWorkDir/user/ce_deploy_dir/ce_deploy.log not exist, need create"
+                    os.system(r'touch %s' % log_file)
+                    # print "/UserWorkDir/user/ce_deploy_dir/ce_deploy.log has been created"
+
+            # clear flag
+            user_found.userInputUploadedFlag = "nok"
+            user_found.save()
+
+            return render(request, 'ce_deployment/ce_deploy.html', {'user': uname})
     else:
         return HttpResponse("please login in first!")
 
@@ -271,6 +356,7 @@ def uploadFile(request):
         user_found.userInputFile = request.FILES['userInputFile']
         file_name = request.FILES['userInputFile'].name
         user_found.userInputFileName = file_name
+        user_found.userInputUploadedFlag = "ok"
         user_found.save()
 
         files = [{'name': file_name}]
@@ -283,58 +369,87 @@ def updateProgress(request):
     if request.method == 'GET':
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
-        return HttpResponse(user_found.progressBarData)
+        progress = user_found.progressBarData
+        return HttpResponse(progress)
 
-def settings(request):
-    # if user logged
-    uname = request.session.get('username')
-    if uname:
-        return render(request, 'settings.html', {'user': uname})
-    else:
-        return HttpResponse("please login in first!")
 
-# settings
-def settings(request):
-    # if find the cookie, then we think the user has been logged in
-    uname = request.session.get('username')
-    if uname:
-        return render(request, 'settings.html', {'user': uname})
-
-def getCurrentConfig(request):
-    uname = request.session.get('username')
-    if uname:
+def ceDeoployStart(request):
+    if request.method == 'POST':
+        uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
-
-        config_data = {'pakServerIp': user_found.pakServerIp,
-                       'pakServerUsername': user_found.pakServerUsername,
-                       'pakServerPasswd': user_found.pakServerPasswd,
-                       'pakServerFp': user_found.pakServerFp}
-
-
-    jstr = json.dumps(config_data)
-
-    return HttpResponse(jstr, content_type='application/json')
-
-def saveConfig(request):
-    uname = request.session.get('username')
-
-    if uname:
-        user_found = WebUser.objects.get(username=uname)
-
         # parse the json data from front-end
-        new_config_data = json.loads(request.body)
+        user_data = json.loads(request.body)
 
-        user_found.pakServerIp = new_config_data['pakServerIp']
-        user_found.pakServerUsername = new_config_data['pakServerUsername']
-        user_found.pakServerPasswd = new_config_data['pakServerPasswd']
-        user_found.pakServerFp = new_config_data['pakServerFp']
+        select_rel = user_data['selectRel']
+        select_pak = user_data['selectPak']
 
+        # # set cookie;
+        # request.session['ce_deploy_state'] = [uname, "ongoing"]
+        # request.session['selectRel'] = select_rel
+        # request.session['selectPak'] = select_pak
+
+        user_found.ceDeployState = "ongoing"
+        user_found.ceSelectRel = select_rel
+        user_found.ceSelectPak = select_pak
         user_found.save()
 
-        return HttpResponse('ok')
+        ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
-    else:
-        return HttpResponse('user not found')
+        return HttpResponse("ok")
+
+def ceDeoployStop(request):
+    if request.method == 'GET':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        user_found.ceDeployState = "stopped"
+        user_found.save()
+        return HttpResponse("ok")
+
+
+def ceDeoployReset(request):
+    if request.method == 'GET':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        user_found.ceDeployState = "initial"
+        user_found.save()
+        return HttpResponseRedirect('/ce-deploy/')
+
+def getCdpLog(request):
+    if request.method == 'GET':
+
+        # directly send the log data to html
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        log_file = user_found.userWorkDir + "/ce_deploy_dir/" + "ce_deploy.log"
+        # return HttpResponse("OK")
+
+        # wait enough time to wait for the log file is ready
+        time.sleep(0.5)
+        fo = open(log_file, "r")
+        log_file_data = fo.read()
+        fo.close()
+        return HttpResponse(log_file_data, content_type="text/plain")
+
+        # # download the log file
+        # uname = request.session.get('username')
+        # user_found = WebUser.objects.get(username=uname)
+        # file_name = "ce_deploy.log"
+        # path_to_file = user_found.userWorkDir + "/ce_deploy_dir/"
+        # response = HttpResponse(content_type='application/force-download')
+        # response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
+        # response['X-Sendfile'] = smart_str(path_to_file)
+        # return response
+
+def queryUserInput(request):
+    if request.method == 'GET':
+        uname = request.session.get('username')
+        user_found = WebUser.objects.get(username=uname)
+        flag = user_found.userInputUploadedFlag
+        return HttpResponse(flag)
+
+
+
+
 
 
 

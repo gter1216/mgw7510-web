@@ -23,10 +23,13 @@ class WebUserForm(ModelForm):
     userInputFile = forms.FileField(label='Select a file',
                                     required=False)
     tmpPath = forms.CharField(required=False)
-
     userInputFileName = forms.CharField(required=False)
-
     progressBarData = forms.CharField(required=False)
+    userInputUploadedFlag = forms.CharField(required=False)
+
+    ceDeployState = forms.CharField(required=False)
+    ceSelectRel = forms.CharField(required=False)
+    ceSelectPak = forms.CharField(required=False)
 
     class Meta:
         model = WebUser  # inherit form WebUser

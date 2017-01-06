@@ -44,5 +44,20 @@ class WebUser(models.Model):
     progressBarData = models.CharField(default="0",
                                        max_length=5)
 
+    # default is nok, which means that user input file not uploaded
+    userInputUploadedFlag = models.CharField(default="nok",
+                                             max_length=5)
+
+    ceDeployState = models.CharField(default="initial",
+                                     max_length=20)
+
+    ceSelectRel = models.CharField(null=True,
+                                   blank=True,
+                                   max_length=10)
+
+    ceSelectPak = models.CharField(null=True,
+                                   blank=True,
+                                   max_length=10)
+
     def __unicode__(self):
         return self.username

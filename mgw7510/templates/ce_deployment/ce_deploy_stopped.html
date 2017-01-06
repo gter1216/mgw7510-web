@@ -81,7 +81,7 @@
                         <label for="select" class="col-lg-2 control-label text-left">Release</label>
                         <div class="col-lg-2">
                             <select class="form-control" id="selectRel">
-                                <option>C7.1</option>
+                                <option>{{selectRel}}</option>
                             </select>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                         <label for="select" class="col-lg-2 control-label text-left">Build (Pak Name)</label>
                         <div class="col-lg-4">
                             <select class="form-control" id="selectPak" style="width: 140%">
-                                <option>Please Select One Pak</option>
+                                <option>{{selectPak}}</option>
                             </select>
                         </div>
                     </div>
@@ -143,22 +143,75 @@
             </div>
         </div>
 
+
+{#        <tr class="template-download fade">#}
+{#            <td>#}
+{#                <span class="preview">#}
+{#                        <a  title="{{userInputFileName}}"  data-gallery></a>#}
+{#                </span>#}
+{#            </td>#}
+{#            <td>#}
+{#                <p class="name">#}
+{#                    <span>{{userInputFileName}}</span>#}
+{#                </p>#}
+{#            </td>#}
+{#            <td>#}
+{#                <span class="size">{%=o.formatFileSize(file.size)%}</span>#}
+{#            </td>#}
+{#            <td>#}
+{#                {% if (file.deleteUrl) { %}#}
+{#                    <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>#}
+{#                        <i class="glyphicon glyphicon-trash"></i>#}
+{#                        <span>Delete</span>#}
+{#                    </button>#}
+{#                    <input type="checkbox" name="delete" value="1" class="toggle">#}
+{#                {% } else { %}#}
+{##}
+{#                {% } %}#}
+{#            </td>#}
+{#        </tr>#}
+
+        <div class="container-fluid">
+            <div class="col-lg-7" style="margin-left: 1%">
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="preview">
+                                            <a  title="{{userInputFileName}}"  data-gallery></a>
+                                    </span>
+                                </td>
+                                <td>
+                                    <p class="name">
+                                        <span>{{userInputFileName}}</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
         <div style="height: 30px;"></div>
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-1">
-                    <button type="button" id="startCe" class="btn btn-primary btn-block col-lg-2">Start</button>
+                    <button type="button" id="startCe" disabled="disabled" class="btn btn-primary btn-block col-lg-2">Start</button>
                 </div>
                 <div class="col-lg-1">
                     <button type="button" id="stopCe" disabled="disabled" class="btn btn-danger btn-block col-lg-2">Stop</button>
                 </div>
                 <div class="col-lg-1">
-                    <button type="button" id="resetCe" disabled="disabled" class="btn btn-warning btn-block col-lg-2">Reset</button>
+                    <button type="button" id="resetCe" class="btn btn-warning btn-block col-lg-2">Reset</button>
                 </div>
             </div>
         </div>
-
-        <div style="height: 10px;"></div>
 
         <div style="height: 30px;"></div>
 
@@ -166,14 +219,14 @@
             <div style="height: 5px;"></div>
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-8">
-                    <div class="progress progress-striped active fade" id="progressOutter">
+                    <div class="progress progress-striped active" id="progressOutter">
                         <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
             <div class="row" style="margin-left:0.1%">
                 <div class = "col-lg-8">
-                    <div class="alert alert-dismissible alert-warning fade" id="logfile">
+                    <div class="alert alert-dismissible alert-warning" id="logfile">
                         <p>
                             Check Running Log:
                         </p>
@@ -206,144 +259,23 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-                get_pak_list();
-                start_ce_deployment();
-                $('#stopCe').click(function(event){
-                    clearInterval(progresspump);
-                    $('#progressOutter').removeClass("active");
-                    $('#progressInner').html("Stopped!");
-                    $('#progressInner').removeClass("progress-bar-success");
-                    $('#progressInner').addClass("progress-bar-danger");
-                    $('#resetCe').removeAttr("disabled");
-                    $('#stopCe').attr("disabled", "disabled");
-                    $.get("stop/", function (data) {
-                        // notify server stop button clicked
-                    });
-                    get_cdp_log()
-                    // wait log file is ready to log
-                    {#                        setTimeout('get_cdp_log()', 800);#}
-                });
-                $('#resetCe').click(function (event) {
-                    window.location.href = "reset/"
-                });
-            });
 
-            function get_pak_list(){
-                $.ajax({
-                    type : "POST", // POST request
-                    dataType : "json", // expect json format data
-                    url : "check-pak/", // target url
-                    data : {
-                        "selectRel" : $('#selectRel').val()
-                    },
-                    success : function(result){
-                        // result form target url
-                        if (result.hasOwnProperty("ok")){
-                            $.each(result["ok"],function(index,item){
-                                $('#selectPak').append(
-                                    "<option>" + item + "</option>"
-                                )
-                            })
-                        }
-                        // failed login to pak server
-                        else if (result.hasOwnProperty("nok")){
-                            alert(result["nok"])
-                        }
-                    },
-                    async: false
-                })
-            } //function get_pak_list()
-
-
-            function start_ce_deployment(){
-                $('#startCe').click(function(event){
-                    check_pre_condition()
-                })
-            }
-
-            function check_pre_condition(){
-                if(
-                    $('#selectPak').val() == "Please Select One Pak"
-                ){
-                    alert("Please select one pak first!");
-                    return
-                }
-                $.get("query-user-input/", function(data){
-                    query_user_input(data)
-                })
-            }
-
-            function query_user_input(data){
-                if (data == "nok") {
-                    // user input file not uploaded
-                    alert("Please upload your user input file!");
-                } else if (data=="ok"){
-                    // user input file is uploaded
-                    update_progress_bar();
-                    contact_server();
-                    //get_cdp_log();
-                    handle_button_state()
-                }
-            }
-
-
-            function update_progress_bar() {
-
-                $('#progressOutter').removeClass("fade");
-
-                progresspump = setInterval(function () {
-                    $.get("update-progress/", function (data) {
-                        // if failed, the data is 101
-                        if (data == "101") {
-                            $('#progressOutter').removeClass("active");
-                            $('#progressInner').css('width', '100%');
-                            $('#progressInner').removeClass("progress-bar-success");
-                            $('#progressInner').addClass("progress-bar-danger");
-                            $('#progressInner').html("Failed, Please check log!")
-                            return
-                        }
-
-                        $('#progressInner').css('width', data + '%');
-                        $('#progressInner').html(data + '%');
-
-                        if (data > 99.999) {
-                            clearInterval(progresspump);
-                            $('#progressOutter').removeClass("active");
-                            $('#progressInner').html("Success Done!")
-                            return
-                        }
-                    })
-                }, 1000); // var progresspump
-            }
-
-            function contact_server(){
-                var userData = {
-                    'selectRel':$('#selectRel').val(),
-                    'selectPak':$('#selectPak').val()
-                };
-
-                // start ce deploy
-                $.post({
-                    url: 'start/',
-                    type: 'POST',
-                    // we can also use form serialize function
-                    data: JSON.stringify(userData)
-                })
-            }
-
-            function get_cdp_log(){
-                $('#logfile').removeClass("fade");
-            }
-
-            function handle_button_state(){
                 $('#selectRel').attr("disabled","disabled");
                 $('#selectPak').attr("disabled","disabled");
                 $('#addFileBton').attr("disabled","disabled");
                 $('#addFileInput').attr("disabled","disabled");
-                $('#startCe').attr("disabled","disabled");
-                $('#stopCe').removeAttr("disabled");
-            }
 
+                $.get("update-progress/", function (data) {
+                    $('#progressInner').css('width', data + '%');
+                    $('#progressInner').removeClass("progress-bar-success");
+                    $('#progressInner').addClass("progress-bar-danger");
+                    $('#progressInner').html("Stopped!")
+                    $('#progressOutter').removeClass("active");
+                });
+                $('#resetCe').click(function (event) {
+                    window.location.href = "reset/"
+                })
+            });
         </script>
 
         {% verbatim %}

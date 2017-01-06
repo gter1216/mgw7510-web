@@ -81,7 +81,7 @@
                         <label for="select" class="col-lg-2 control-label text-left">Release</label>
                         <div class="col-lg-2">
                             <select class="form-control" id="selectRel">
-                                <option>C7.1</option>
+                                <option>{{selectRel}}</option>
                             </select>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                         <label for="select" class="col-lg-2 control-label text-left">Build (Pak Name)</label>
                         <div class="col-lg-4">
                             <select class="form-control" id="selectPak" style="width: 140%">
-                                <option>Please Select One Pak</option>
+                                <option>{{selectPak}}</option>
                             </select>
                         </div>
                     </div>
@@ -143,6 +143,32 @@
             </div>
         </div>
 
+        <div class="container-fluid">
+            <div class="col-lg-7" style="margin-left: 1%">
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="preview">
+                                            <a  title="{{userInputFileName}}"  data-gallery></a>
+                                    </span>
+                                </td>
+                                <td>
+                                    <p class="name">
+                                        <span>{{userInputFileName}}</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
         <div style="height: 30px;"></div>
         <div class="container-fluid">
             <div class="row" style="margin-left:0.1%">
@@ -158,15 +184,13 @@
             </div>
         </div>
 
-        <div style="height: 10px;"></div>
-
         <div style="height: 30px;"></div>
 
         <div class="container-fluid">
             <div style="height: 5px;"></div>
             <div class="row" style="margin-left:0.1%">
                 <div class="col-lg-8">
-                    <div class="progress progress-striped active fade" id="progressOutter">
+                    <div class="progress progress-striped active" id="progressOutter">
                         <div class="progress-bar progress-bar-success" id="progressInner" style="width: 0%"></div>
                     </div>
                 </div>
@@ -206,8 +230,12 @@
 
         <script type="text/javascript">
             $(document).ready(function(){
-                get_pak_list();
-                start_ce_deployment();
+                //get_pak_list();
+                //start_ce_deployment();
+
+                update_progress_bar();
+                //get_cdp_log();
+                handle_button_state();
                 $('#stopCe').click(function(event){
                     clearInterval(progresspump);
                     $('#progressOutter').removeClass("active");
@@ -215,17 +243,15 @@
                     $('#progressInner').removeClass("progress-bar-success");
                     $('#progressInner').addClass("progress-bar-danger");
                     $('#resetCe').removeAttr("disabled");
-                    $('#stopCe').attr("disabled", "disabled");
+                    $('#stopCe').attr("disabled","disabled");
                     $.get("stop/", function (data) {
                         // notify server stop button clicked
                     });
                     get_cdp_log()
-                    // wait log file is ready to log
-                    {#                        setTimeout('get_cdp_log()', 800);#}
-                });
+                })
                 $('#resetCe').click(function (event) {
                     window.location.href = "reset/"
-                });
+                })
             });
 
             function get_pak_list(){
@@ -281,7 +307,7 @@
                     // user input file is uploaded
                     update_progress_bar();
                     contact_server();
-                    //get_cdp_log();
+                    get_cdp_log();
                     handle_button_state()
                 }
             }
@@ -291,6 +317,7 @@
 
                 $('#progressOutter').removeClass("fade");
 
+                // progresspump is a global var, if function update_progress_bar is called
                 progresspump = setInterval(function () {
                     $.get("update-progress/", function (data) {
                         // if failed, the data is 101
@@ -341,6 +368,7 @@
                 $('#addFileBton').attr("disabled","disabled");
                 $('#addFileInput').attr("disabled","disabled");
                 $('#startCe').attr("disabled","disabled");
+{#                $('#resetCe').attr("disabled","disabled");#}
                 $('#stopCe').removeAttr("disabled");
             }
 
