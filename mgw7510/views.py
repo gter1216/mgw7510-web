@@ -218,7 +218,10 @@ def getCurrentConfig(request):
         user_found = WebUser.objects.get(username=uname)
 
         config_data = {'pakServerIp': user_found.pakServerIp, 'pakServerUsername': user_found.pakServerUsername,
-                       'pakServerPasswd': user_found.pakServerPasswd, 'pakServerFp': user_found.pakServerFp}
+                       'pakServerPasswd': user_found.pakServerPasswd, 'pakServerFp': user_found.pakServerFp,
+                       'seedVMIp': user_found.seedVMIp, 'seedVMUsername': user_found.seedVMUsername,
+                       'seedVMPasswd': user_found.seedVMPasswd, 'seedVMOpenrcAbsPath': user_found.seedVMOpenrcAbsPath,
+                       'seedVMKeypairAbsPath': user_found.seedVMKeypairAbsPath}
 
     jstr = json.dumps(config_data)
 
@@ -237,6 +240,12 @@ def saveConfig(request):
         user_found.pakServerUsername = new_config_data['pakServerUsername']
         user_found.pakServerPasswd = new_config_data['pakServerPasswd']
         user_found.pakServerFp = new_config_data['pakServerFp']
+
+        user_found.seedVMIp = new_config_data['seedVMIp']
+        user_found.seedVMUsername = new_config_data['seedVMUsername']
+        user_found.seedVMPasswd = new_config_data['seedVMPasswd']
+        user_found.seedVMOpenrcAbsPath = new_config_data['seedVMOpenrcAbsPath']
+        user_found.seedVMKeypairAbsPath = new_config_data['seedVMKeypairAbsPath']
 
         user_found.save()
 

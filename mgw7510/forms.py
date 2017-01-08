@@ -23,8 +23,8 @@ class WebUserForm(ModelForm):
     seedVMIp = forms.GenericIPAddressField(required=False)
     seedVMUsername = forms.CharField(required=False)
     seedVMPasswd = forms.CharField(required=False)
-    openrcAbsPath = forms.CharField(required=False)
-    keypairAbsPath = forms.CharField(required=False)
+    seedVMOpenrcAbsPath = forms.CharField(required=False)
+    seedVMKeypairAbsPath = forms.CharField(required=False)
 
     userInputFile = forms.FileField(label='Select a file',
                                     required=False)

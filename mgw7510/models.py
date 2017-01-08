@@ -25,8 +25,8 @@ class WebUser(models.Model):
     seedVMIp = models.GenericIPAddressField(max_length=50, default="172.39.5.116")
     seedVMUsername = models.CharField(max_length=100, default="root")
     seedVMPasswd = models.CharField(max_length=50, default="newsys")
-    openrcAbsPath = models.CharField(max_length=300, default="/root/cloud-env/Rainbow-openrc.sh")
-    keypairAbsPath = models.CharField(max_length=300, default="/root/cloud-env/BGW-keypair.pem")
+    seedVMOpenrcAbsPath = models.CharField(max_length=300, default="/root/cloud-env/Rainbow-openrc.sh")
+    seedVMKeypairAbsPath = models.CharField(max_length=300, default="/root/cloud-env/BGW-keypair.pem")
 
     userInputFile = models.FileField(null=True,
                                      blank=True,

@@ -185,11 +185,11 @@
                                 <div style="height: 10px"></div>
                                 <div class="form-group">
                                     <label class="control-label" style="font-weight: 300;">Openrc File Absolute Path</label>
-                                    <input type="text" class="form-control" name="openrcAbsPath" id="openrcAbsPath">
+                                    <input type="text" class="form-control" name="seedVMOpenrcAbsPath" id="seedVMOpenrcAbsPath">
                                 </div>
                                 <div class="form-group">
                                     <label class="control-label" style="font-weight: 300;">Key Pair Absolute Path</label>
-                                    <input type="text" class="form-control" name="keypairAbsPath" id="keypairAbsPath">
+                                    <input type="text" class="form-control" name="seedVMKeypairAbsPath" id="seedVMKeypairAbsPath">
                                 </div> <!-- Seed VM Config-->
 
                                 <div style="height: 30px;"></div>
@@ -353,8 +353,8 @@
                     'seedVMIp': $('#seedVMIp').val(),
                     'seedVMUsername': $('#seedVMUsername').val(),
                     'seedVMPasswd': $('#seedVMPasswd').val(),
-                    'openrcAbsPath': $('#openrcAbsPath').val(),
-                    'keypairAbsPath': $('#keypairAbsPath').val()
+                    'seedVMOpenrcAbsPath': $('#seedVMOpenrcAbsPath').val(),
+                    'seedVMkeypairAbsPath': $('#seedVMkeypairAbsPath').val()
                 };
 
                 $.post({
