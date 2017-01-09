@@ -55,7 +55,7 @@
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="themes">
 {#								<li><a href="/change-password/?p1={{user}}">change password</a></li>#}
-                                <li><a href="/settings">settings</a></li>
+                                <li><a href="/settings" target="_blank">settings</a></li>
 								<li><a href="/logout">log out</a></li>
 							</ul>
 						</li>
@@ -228,7 +228,7 @@
                 <div class = "col-lg-8">
                     <div class="alert alert-dismissible alert-warning fade" id="logfile">
                         <p>
-                            Check Running Log:
+                            Check Log:
                         </p>
                         <p>
                             <a href="get-cdp-log/" class="alert-link" target="_blank">
@@ -264,6 +264,9 @@
                 $('#selectPak').attr("disabled","disabled");
                 $('#addFileBton').attr("disabled","disabled");
                 $('#addFileInput').attr("disabled","disabled");
+
+                $('#progressOutter').removeClass("fade");
+                $('#logfile').removeClass("fade")
 
                 $.get("update-progress/", function (data) {
                     $('#progressInner').css('width', data + '%');

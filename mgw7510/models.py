@@ -28,6 +28,12 @@ class WebUser(models.Model):
     seedVMOpenrcAbsPath = models.CharField(max_length=300, default="/root/cloud-env/Rainbow-openrc.sh")
     seedVMKeypairAbsPath = models.CharField(max_length=300, default="/root/cloud-env/BGW-keypair.pem")
 
+    yactServerIp = models.GenericIPAddressField(max_length=50, default="135.251.49.19")
+    yactServerUsername = models.CharField(max_length=100, default="darcy")
+    yactServerPasswd = models.CharField(max_length=50, default="initial")
+    yactServerDIFAbsPath = models.CharField(max_length=300, default="/home/darcy/oam_linux_DIF_FILL/7510-CE/C710.ad1115/")
+    yactServerYactAbsPath = models.CharField(max_length=300, default="/home/darcy/YACT/")
+
     userInputFile = models.FileField(null=True,
                                      blank=True,
                                      upload_to=get_upload_path)

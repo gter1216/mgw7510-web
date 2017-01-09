@@ -144,7 +144,7 @@ WSGI_APPLICATION = 'R01.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'mgw7510.db'),
+        'NAME': os.path.join(BASE_DIR, 'mgw7510_v2.db'),
     }
 }
 

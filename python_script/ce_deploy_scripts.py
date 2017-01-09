@@ -23,7 +23,7 @@ def createSSHSession(host, username, password, prompt):
     logging.info('\n%s \n' % cmd)
 
     child = pexpect.spawn(cmd)
-    ret = child.expect([pexpect.TIMEOUT, 'password:', 'Are you sure you want to continue connecting'], timeout=5)
+    ret = child.expect([pexpect.TIMEOUT, 'password:', 'Are you sure you want to continue connecting'], timeout=20)
 
     logging.info('\nret is %s \n' % ret)
 
@@ -34,7 +34,7 @@ def createSSHSession(host, username, password, prompt):
         child.expect(prompt)
     elif ret == 2:
         child.sendline("yes")
-        ret = child.expect([pexpect.TIMEOUT, 'password'], timeout=5)
+        ret = child.expect([pexpect.TIMEOUT, 'password'], timeout=20)
         if ret == 0:
             raise Exception("\nssh to %s timeout \n" % host)
         elif ret == 1:
@@ -78,7 +78,7 @@ def update_progbar_by_scp(user, session, prompt, scp_step, progbar_total_incr):
     progbar_step = round(progbar_total_incr/(scp_len+1))
     progbar_step = int(progbar_step)
 
-    scp_to = round(360/(scp_len+1))
+    scp_to = round(3600/(scp_len+1))
     scp_to = int(scp_to)
 
     print scp_list
@@ -103,6 +103,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     # initial log setting
     user_found = WebUser.objects.get(username=uname)
+    uname_dir = uname.replace("@", "_")
     work_dir = user_found.userWorkDir + "/ce_deploy_dir"
     log_file = work_dir + "/ce_deploy.log"
 
@@ -153,154 +154,395 @@ def start_ce_deployment(uname, select_rel, select_pak):
     #####################################################################################
     ##### step1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer START
     #####################################################################################
-    logging.info('\nStep1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer \n')
-    pak_server_ip = user_found.pakServerIp
-    pak_server_username = user_found.pakServerUsername
-    pak_server_password = user_found.pakServerPasswd
-    pak_server_fp = user_found.pakServerFp
-
-    logging.info('\n'
-                 'pak server ip is %s, \n'
-                 'pak server username is %s, \n'
-                 'pak server password is is %s \n' % (pak_server_ip, pak_server_username, pak_server_password))
-
-    # target path is ===> user_upload_dir
-
-    # get source path
-    # find ./ -name "nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2"
-    # -exec bash -c 'scp -a `dirname {}` ./xuxiao ' \;
-    # find /viewstores/public/SLP/7510C71 -name "nokia-mgw-rhel7.2-3.10.0-327.18.2-2.ae1b0416.x86_64.qcow2" -exec bash -c 'dirname {}' \;
-    # /viewstores/public/SLP/7510C71/A7510_C71_11_04_2016_ae1b0416
-
-    try:
-        # $ is a special prompt, need add \
-        # pak_prompt = [pexpect.TIMEOUT, '\$']
-        pak_prompt = '\$'
-        pak_session = createSSHSession(pak_server_ip, pak_server_username, pak_server_password, pak_prompt)
-
-        # cd `find /viewstores/public/SLP/7510C71/ -name nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2 -exec dirname {} \;`
-        pak_cmd = "cd " + "`" + "find " + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
-                "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
-
-        pak_session.sendline(pak_cmd)
-        pak_session.expect(pak_prompt)
-        logging.info('\n%s \n' % pak_session.before)
-
-        logging.info('\nls \n')
-        pak_session.sendline('ls')
-        pak_session.expect(pak_prompt)
-        logging.info('\n%s \n' % pak_session.before)
-
-        # scp -r *M_O*csar.zip *.qcow2 root@135.251.216.181:user_upload_dir
-
-        pak_cmd2 = "scp -r " + "*M_O*csar.zip *.qcow2 " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir
-        logging.info('\n%s \n' % pak_cmd2)
-        pak_session.sendline(pak_cmd2)
-        pak_ret = pak_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=5)
-        if pak_ret == 0:
-            raise Exception("\nscp to webserver timeout \n")
-        elif pak_ret == 1:
-            pak_session.sendline(WEB_SERVER_PASSWORD)
-        elif pak_ret == 2:
-            logging.info('\n%s \n' % pak_session.before)
-            pak_session.sendline("yes")
-            pak_ret = pak_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=5)
-            if pak_ret == 0:
-                raise Exception("\nscp to webserver timeout \n")
-            elif pak_ret == 1:
-                logging.info('\n%s \n' % pak_session.before)
-                pak_session.sendline(WEB_SERVER_PASSWORD)
-
-        update_progbar_by_scp(user=user_found,
-                              session=pak_session,
-                              prompt=pak_prompt,
-                              scp_step=3,
-                              progbar_total_incr=35)
-
-
-        # pak_session.expect(pak_prompt, timeout=360)
-        # pak_session.expect('10%', timeout=36)
-        # user_found.progressBarData = "5"
-        # user_found.save()
-        #
-        # pak_session.expect('20%', timeout=36)
-        # user_found.progressBarData = "8"
-        # user_found.save()
-        #
-        # pak_session.expect('30%', timeout=36)
-        # user_found.progressBarData = "11"
-        # user_found.save()
-        #
-        # pak_session.expect('40%', timeout=36)
-        # user_found.progressBarData = "14"
-        # user_found.save()
-        #
-        # pak_session.expect('50%', timeout=36)
-        # user_found.progressBarData = "17"
-        # user_found.save()
-        #
-        # pak_session.expect('60%', timeout=36)
-        # user_found.progressBarData = "20"
-        # user_found.save()
-        #
-        # pak_session.expect('70%', timeout=36)
-        # user_found.progressBarData = "23"
-        # user_found.save()
-        #
-        # pak_session.expect('80%', timeout=36)
-        # user_found.progressBarData = "26"
-        # user_found.save()
-        #
-        # pak_session.expect('90%', timeout=36)
-        # user_found.progressBarData = "29"
-        # user_found.save()
-        #
-        # pak_session.expect(pak_prompt, timeout=36)
-        # user_found.progressBarData = "32"
-        # user_found.save()
-
-        # logging.info('\nssh to pak server \n')
-        # s = pxssh.pxssh()
-        # s.login(pak_server_ip, pak_server_username, pak_server_password, original_prompt='[$#>]')
-        #
-        #
-        # # cd `find /viewstores/public/SLP/7510C71/ -name nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2 -exec dirname {} \;`
-        #
-        # cmd1 = "cd " + "`" + "find " + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
-        #         "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
-        #
-        # logging.info('\ncmd is: %s \n' % cmd1)
-        # s.sendline(cmd1)
-        # s.prompt()
-        #
-        # s.sendline('ls')
-        # s.prompt()
-        # logging.info('\nls is: %s \n' % s.before)
-        #
-        # # scp -r *M_O*csar.zip *.qcow2 root@135.251.216.181:user_upload_dir
-        #
-        # cmd2 = "scp -r " + "*M_O*csar.zip *.qcow2 " + "root@135.251.216.181:" + user_upload_dir
-        # logging.info('\ncmd is: %s \n' % cmd2)
-        # s.sendline(cmd2)
-        # s.prompt()
-        #
-        # s.logout()
-
-    except Exception, e:
-        logging.error('\nproblem during ssh to pak server: %s \n' % str(e))
-        user_found.progressBarData = "101"
-        user_found.save()
-        return
-    finally:
-        pak_session.close()
-
+    # # for debug mode only, start
+    # logging.info('\nStep1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer \n')
+    # pak_server_ip = user_found.pakServerIp
+    # pak_server_username = user_found.pakServerUsername
+    # pak_server_password = user_found.pakServerPasswd
+    # pak_server_fp = user_found.pakServerFp
+    #
+    # logging.info('\n'
+    #              'pak server ip is %s, \n'
+    #              'pak server username is %s, \n'
+    #              'pak server password is is %s \n' % (pak_server_ip, pak_server_username, pak_server_password))
+    #
+    # # target path is ===> user_upload_dir
+    #
+    # # get source path
+    # # find ./ -name "nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2"
+    # # -exec bash -c 'scp -a `dirname {}` ./xuxiao ' \;
+    # # find /viewstores/public/SLP/7510C71 -name "nokia-mgw-rhel7.2-3.10.0-327.18.2-2.ae1b0416.x86_64.qcow2" -exec bash -c 'dirname {}' \;
+    # # /viewstores/public/SLP/7510C71/A7510_C71_11_04_2016_ae1b0416
+    #
+    # try:
+    #     # $ is a special prompt, need add \
+    #     # pak_prompt = [pexpect.TIMEOUT, '\$']
+    #     pak_prompt = '\$'
+    #     pak_session = createSSHSession(pak_server_ip, pak_server_username, pak_server_password, pak_prompt)
+    #
+    #     # cd `find /viewstores/public/SLP/7510C71/ -name nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2 -exec dirname {} \;`
+    #     pak_cmd = "cd " + "`" + "find " + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
+    #             "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
+    #
+    #     pak_session.sendline(pak_cmd)
+    #     pak_session.expect(pak_prompt)
+    #     logging.info('\n%s \n' % pak_session.before)
+    #
+    #     logging.info('\nls \n')
+    #     pak_session.sendline('ls')
+    #     pak_session.expect(pak_prompt)
+    #     logging.info('\n%s \n' % pak_session.before)
+    #
+    #     # scp -r *M_O*csar.zip *.qcow2 root@135.251.216.181:user_upload_dir
+    #
+    #     pak_cmd2 = "scp -r " + "*M_O*csar.zip *.qcow2 " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir
+    #     # pak_cmd2 = "scp -r " + "*M_O*csar.zip " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir
+    #
+    #
+    #     logging.info('\n%s \n' % pak_cmd2)
+    #     pak_session.sendline(pak_cmd2)
+    #     pak_ret = pak_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=5)
+    #     if pak_ret == 0:
+    #         raise Exception("\nscp to webserver timeout \n")
+    #     elif pak_ret == 1:
+    #         pak_session.sendline(WEB_SERVER_PASSWORD)
+    #     elif pak_ret == 2:
+    #         logging.info('\n%s \n' % pak_session.before)
+    #         pak_session.sendline("yes")
+    #         pak_ret = pak_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=5)
+    #         if pak_ret == 0:
+    #             raise Exception("\nscp to webserver timeout \n")
+    #         elif pak_ret == 1:
+    #             logging.info('\n%s \n' % pak_session.before)
+    #             pak_session.sendline(WEB_SERVER_PASSWORD)
+    #
+    #     update_progbar_by_scp(user=user_found,
+    #                           session=pak_session,
+    #                           prompt=pak_prompt,
+    #                           scp_step=3,
+    #                           progbar_total_incr=35)
+    #
+    #
+    #     # pak_session.expect(pak_prompt, timeout=360)
+    #     # pak_session.expect('10%', timeout=36)
+    #     # user_found.progressBarData = "5"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('20%', timeout=36)
+    #     # user_found.progressBarData = "8"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('30%', timeout=36)
+    #     # user_found.progressBarData = "11"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('40%', timeout=36)
+    #     # user_found.progressBarData = "14"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('50%', timeout=36)
+    #     # user_found.progressBarData = "17"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('60%', timeout=36)
+    #     # user_found.progressBarData = "20"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('70%', timeout=36)
+    #     # user_found.progressBarData = "23"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('80%', timeout=36)
+    #     # user_found.progressBarData = "26"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect('90%', timeout=36)
+    #     # user_found.progressBarData = "29"
+    #     # user_found.save()
+    #     #
+    #     # pak_session.expect(pak_prompt, timeout=36)
+    #     # user_found.progressBarData = "32"
+    #     # user_found.save()
+    #
+    #     # logging.info('\nssh to pak server \n')
+    #     # s = pxssh.pxssh()
+    #     # s.login(pak_server_ip, pak_server_username, pak_server_password, original_prompt='[$#>]')
+    #     #
+    #     #
+    #     # # cd `find /viewstores/public/SLP/7510C71/ -name nokia-mgw-rhel7.2-3.10.0-327.18.2.ae1a3116.x86_64.qcow2 -exec dirname {} \;`
+    #     #
+    #     # cmd1 = "cd " + "`" + "find " + pak_server_fp + "/" + "7510" + select_rel.replace(".", "") + "/ " + \
+    #     #         "-name " + select_pak + " -exec " + "dirname {} " + '\\;' + "`"
+    #     #
+    #     # logging.info('\ncmd is: %s \n' % cmd1)
+    #     # s.sendline(cmd1)
+    #     # s.prompt()
+    #     #
+    #     # s.sendline('ls')
+    #     # s.prompt()
+    #     # logging.info('\nls is: %s \n' % s.before)
+    #     #
+    #     # # scp -r *M_O*csar.zip *.qcow2 root@135.251.216.181:user_upload_dir
+    #     #
+    #     # cmd2 = "scp -r " + "*M_O*csar.zip *.qcow2 " + "root@135.251.216.181:" + user_upload_dir
+    #     # logging.info('\ncmd is: %s \n' % cmd2)
+    #     # s.sendline(cmd2)
+    #     # s.prompt()
+    #     #
+    #     # s.logout()
+    #
+    # except Exception, e:
+    #     logging.error('\nproblem during ssh to pak server: %s \n' % str(e))
+    #     user_found.progressBarData = "101"
+    #     user_found.save()
+    #     return
+    # finally:
+    #     pak_session.close()
+    ## for debug mode only, end
     #####################################################################################
     ##### step1: Get CSAR & QCOW2 file from PakServer(ngnsvr11) into WebServer END
     #####################################################################################
 
 
 
+    #####################################################################################
+    ##### step2: Upload CSAR & QCOW2 file into SeedVM START
+    #####################################################################################
+    # # for debug mode only, start
+    # logging.info('\nStep2: Upload CSAR & QCOW2 file into SeedVM \n')
+    # seedvm_ip = user_found.seedVMIp
+    # seedvm_username = user_found.seedVMUsername
+    # seedvm_passwd = user_found.seedVMPasswd
+    #
+    # logging.info('\n'
+    #              'seed vm ip is %s, \n'
+    #              'seed vm username is %s, \n'
+    #              'seed vm password is is %s \n' % (seedvm_ip, seedvm_username, seedvm_passwd))
+    #
+    # try:
+    #     seedvm_prompt = '#'
+    #     seedvm_session = createSSHSession(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
+    #
+    #     seedvm_work_dir = "/root/" + uname_dir
+    #
+    #
+    #     # create seed vm workdir
+    #     # if exists, then rm it and then create it
+    #     seedvm_cmd = "mkdir " + seedvm_work_dir
+    #     seedvm_session.sendline(seedvm_cmd)
+    #     seedvm_ret = seedvm_session.expect([seedvm_prompt, 'File exists'])
+    #
+    #     if seedvm_ret == 0:
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #     elif seedvm_ret == 1:
+    #         # first match File exists, then match '~#' !!!!!!!!!!IMPORTANT!!!!!!!!!!
+    #         seedvm_session.expect(seedvm_prompt)
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         seedvm_session.sendline("rm -rf " + seedvm_work_dir)
+    #         seedvm_session.expect(seedvm_prompt)
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         seedvm_session.sendline(seedvm_cmd)
+    #         seedvm_session.expect(seedvm_prompt)
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         seedvm_session.sendline("cd " + seedvm_work_dir)
+    #         seedvm_session.expect(seedvm_prompt)
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #
+    #     # upload CSAR & qcow2 to "seedvm_work_dir"
+    #
+    #     seedvm_cmd2 = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir + "/*.zip " + "./"
+    #
+    #     seedvm_session.sendline(seedvm_cmd2)
+    #     seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=300)
+    #     if seedvm_ret == 0:
+    #         raise Exception("\nscp to webserver timeout \n")
+    #     elif seedvm_ret == 1:
+    #         seedvm_session.sendline(WEB_SERVER_PASSWORD)
+    #     elif seedvm_ret == 2:
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         seedvm_session.sendline("yes")
+    #         seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=300)
+    #         if seedvm_ret == 0:
+    #             raise Exception("\nscp to webserver timeout \n")
+    #         elif seedvm_ret == 1:
+    #             logging.info('\n%s \n' % seedvm_session.before)
+    #             seedvm_session.sendline(WEB_SERVER_PASSWORD)
+    #
+    #     seedvm_session.expect(seedvm_prompt)
+    #     logging.info('\n%s \n' % seedvm_session.before)
+    #
+    #     user_found.progressBarData = "45"
+    #     user_found.save()
+    #
+    #     seedvm_cmd3 = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir + "/*.qcow2 " + "./"
+    #     seedvm_session.sendline(seedvm_cmd3)
+    #     seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=100)
+    #     if seedvm_ret == 0:
+    #         raise Exception("\nscp to webserver timeout \n")
+    #     elif seedvm_ret == 1:
+    #         seedvm_session.sendline(WEB_SERVER_PASSWORD)
+    #     elif seedvm_ret == 2:
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         seedvm_session.sendline("yes")
+    #         seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=100)
+    #         if seedvm_ret == 0:
+    #             raise Exception("\nscp to webserver timeout \n")
+    #         elif seedvm_ret == 1:
+    #             logging.info('\n%s \n' % seedvm_session.before)
+    #             seedvm_session.sendline(WEB_SERVER_PASSWORD)
+    #
+    #     update_progbar_by_scp(user=user_found,
+    #                           session=seedvm_session,
+    #                           prompt=seedvm_prompt,
+    #                           scp_step=3,
+    #                           progbar_total_incr=35)
+    #
+    #     ############## step3: Create Image
+    #     logging.info('\nStep3: create image \n')
+    #     seedvm_session.sendline("cd " + seedvm_work_dir)
+    #     seedvm_session.expect(seedvm_prompt)
+    #     logging.info('\n%s \n' % seedvm_session.before)
+    #
+    #     seedvm_session.sendline("source " + user_found.seedVMOpenrcAbsPath)
+    #     seedvm_session.expect(seedvm_prompt)
+    #     logging.info('\n%s \n' % seedvm_session.before)
+    #
+    #     create_glance_cmd = "glance image-create --name=" + select_pak.strip(".qcow2") + " --file=" + select_pak + \
+    #                         " --disk-format=qcow2  --container-format=bare  --is-public=false --is-protected=false"
+    #     logging.info('\n%s \n' % create_glance_cmd)
+    #     seedvm_session.sendline(create_glance_cmd)
+    #     seedvm_ret = seedvm_session.expect(['Errno', seedvm_prompt], timeout=50)
+    #     if seedvm_ret == 0:
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #         raise Exception("\ncreate glance image failed \n")
+    #     elif seedvm_ret ==1:
+    #         logging.info('\n%s \n' % seedvm_session.before)
+    #
+    # except Exception, e:
+    #     logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
+    #     user_found.progressBarData = "101"
+    #     user_found.save()
+    #     return
+    # finally:
+    #     seedvm_session.close()
+    # # for debug only, stop
 
+    user_found.progressBarData = "80"
+    user_found.save()
+
+    #####################################################################################
+    ##### step2,3: Upload CSAR & QCOW2 file into SeedVM & Create Image END
+    #####################################################################################
+
+
+    #####################################################################################
+    ##### step4: Make YAML & SCRIPT files Start, then download ne_xxx to webserver
+    #####################################################################################
+    logging.info('\nStep4: Make YAML & SCRIPT Files on YACT Server, thend download to webserver \n')
+    yact_server_ip = user_found.yactServerIp
+    yact_server_username = user_found.yactServerUsername
+    yact_server_passwd = user_found.yactServerPasswd
+    yact_server_dif_path = user_found.yactServerDIFAbsPath
+    yact_server_yact_path = user_found.yactServerYactAbsPath
+
+    logging.info('\n'
+                 'yact server ip is %s, \n'
+                 'yact server username is %s, \n'
+                 'yact server password is is %s \n'
+                 'yact server dif tool path is %s\n'
+                 'yact server yact tool path is %s\n'
+                 % (yact_server_ip,
+                    yact_server_username,
+                    yact_server_passwd,
+                    yact_server_dif_path,
+                    yact_server_yact_path))
+
+    try:
+        yact_prompt = '\$'
+        yact_session = createSSHSession(yact_server_ip, yact_server_username, yact_server_passwd, yact_prompt)
+
+        # rename the user input file
+        new_user_input_file_name = uname_dir + '_' + user_input_file_name
+        new_user_input_source = user_input_target
+        new_user_input_target = user_upload_dir + '/' + new_user_input_file_name
+        shutil.move(new_user_input_source, new_user_input_target)
+
+        # upload user input to yact server dif path
+        yact_session.sendline("cd " + yact_server_dif_path)
+        yact_session.expect(yact_prompt)
+        logging.info('\n%s \n' % yact_session.before)
+
+        yact_scp_cmd = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + new_user_input_target + " ./"
+        yact_session.sendline(yact_scp_cmd)
+        yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=50)
+        if yact_ret == 0:
+            raise Exception("\nscp to webserver timeout \n")
+        elif yact_ret == 1:
+            yact_session.sendline(WEB_SERVER_PASSWORD)
+        elif yact_ret == 2:
+            logging.info('\n%s \n' % yact_session.before)
+            yact_session.sendline("yes")
+            yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=50)
+            if yact_ret == 0:
+                raise Exception("\nscp to webserver timeout \n")
+            elif yact_ret == 1:
+                logging.info('\n%s \n' % yact_session.before)
+                yact_session.sendline(WEB_SERVER_PASSWORD)
+
+        yact_session.expect(yact_prompt)
+        logging.info('\n%s \n' % yact_session.before)
+
+        user_found.progressBarData = "82"
+        user_found.save()
+
+        # generate output by DIF tool
+        # python dif_fill.py -i input-dif.xlsm -u user-input-xuxiao.xlsx -o output-xuxiao.xlsm
+        # cp output-xuxiao.xlsm  /home/darcy/YACT/
+
+        yact_output_name = "output_" + new_user_input_file_name.strip("xlsx") + "xlsm"
+        yact_gen_output_cmd = "python dif_fill.py -i input-dif.xlsm -u " + \
+                              new_user_input_file_name + " -o " + yact_output_name
+
+        logging.info('\n%s \n' % yact_gen_output_cmd)
+
+        yact_session.sendline(yact_gen_output_cmd)
+        yact_session.expect(yact_prompt, timeout=300)
+        logging.info('\n%s \n' % yact_session.before)
+
+        yact_session.sendline("mv " + yact_output_name + " " + yact_server_yact_path)
+        yact_session.expect(yact_prompt)
+        logging.info('\n%s \n' % yact_session.before)
+
+        # remove uploaded user input file
+        yact_session.sendline("rm -rf " + new_user_input_file_name)
+        yact_session.expect(yact_prompt)
+        logging.info('\n%s \n' % yact_session.before)
+
+        user_found.progressBarData = "84"
+        user_found.save()
+
+        # generate ne_xxx
+        yact_session.sendline("cd " + yact_server_yact_path)
+
+        yact_session.expect(yact_prompt)
+        logging.info('\n%s \n' % yact_session.before)
+
+
+    except Exception, e:
+        logging.error('\nproblem during ssh to yact server: %s \n' % str(e))
+        user_found.progressBarData = "101"
+        user_found.save()
+        return
+    finally:
+        yact_session.close()
+    # for debug only, stop
+
+    user_found.progressBarData = "85"
+    user_found.save()
+
+    #####################################################################################
+    ##### step4: Make YAML & SCRIPT files End
+    #####################################################################################
 
 
 

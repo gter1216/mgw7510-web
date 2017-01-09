@@ -217,15 +217,22 @@ def getCurrentConfig(request):
     if uname:
         user_found = WebUser.objects.get(username=uname)
 
-        config_data = {'pakServerIp': user_found.pakServerIp, 'pakServerUsername': user_found.pakServerUsername,
-                       'pakServerPasswd': user_found.pakServerPasswd, 'pakServerFp': user_found.pakServerFp,
-                       'seedVMIp': user_found.seedVMIp, 'seedVMUsername': user_found.seedVMUsername,
-                       'seedVMPasswd': user_found.seedVMPasswd, 'seedVMOpenrcAbsPath': user_found.seedVMOpenrcAbsPath,
-                       'seedVMKeypairAbsPath': user_found.seedVMKeypairAbsPath}
-
-    jstr = json.dumps(config_data)
-
-    return HttpResponse(jstr, content_type='application/json')
+        config_data = {'pakServerIp': user_found.pakServerIp,
+                       'pakServerUsername': user_found.pakServerUsername,
+                       'pakServerPasswd': user_found.pakServerPasswd,
+                       'pakServerFp': user_found.pakServerFp,
+                       'seedVMIp': user_found.seedVMIp,
+                       'seedVMUsername': user_found.seedVMUsername,
+                       'seedVMPasswd': user_found.seedVMPasswd,
+                       'seedVMOpenrcAbsPath': user_found.seedVMOpenrcAbsPath,
+                       'seedVMKeypairAbsPath': user_found.seedVMKeypairAbsPath,
+                       'yactServerIp': user_found.yactServerIp,
+                       'yactServerUsername': user_found.yactServerUsername,
+                       'yactServerPasswd': user_found.yactServerPasswd,
+                       'yactServerDIFAbsPath': user_found.yactServerDIFAbsPath,
+                       'yactServerYactAbsPath': user_found.yactServerYactAbsPath}
+        jstr = json.dumps(config_data)
+        return HttpResponse(jstr, content_type='application/json')
 
 def saveConfig(request):
     uname = request.session.get('username')
@@ -235,6 +242,9 @@ def saveConfig(request):
 
         # parse the json data from front-end
         new_config_data = json.loads(request.body)
+
+        print new_config_data
+        print new_config_data['seedVMKeypairAbsPath']
 
         user_found.pakServerIp = new_config_data['pakServerIp']
         user_found.pakServerUsername = new_config_data['pakServerUsername']
@@ -246,6 +256,12 @@ def saveConfig(request):
         user_found.seedVMPasswd = new_config_data['seedVMPasswd']
         user_found.seedVMOpenrcAbsPath = new_config_data['seedVMOpenrcAbsPath']
         user_found.seedVMKeypairAbsPath = new_config_data['seedVMKeypairAbsPath']
+
+        user_found.yactServerIp = new_config_data['yactServerIp']
+        user_found.yactServerUsername = new_config_data['yactServerUsername']
+        user_found.yactServerPasswd = new_config_data['yactServerPasswd']
+        user_found.yactServerDIFAbsPath = new_config_data['yactServerDIFAbsPath']
+        user_found.yactServerYactAbsPath = new_config_data['yactServerYactAbsPath']
 
         user_found.save()
 
@@ -402,7 +418,8 @@ def ceDeoployStart(request):
         user_found.ceSelectPak = select_pak
         user_found.save()
 
-        ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
+        if uname:
+            ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
         return HttpResponse("ok")
 
