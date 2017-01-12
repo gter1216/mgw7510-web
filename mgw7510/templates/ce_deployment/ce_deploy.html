@@ -55,7 +55,7 @@
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="themes">
 {#								<li><a href="/change-password/?p1={{user}}">change password</a></li>#}
-                                <li><a href="/settings">settings</a></li>
+                                <li><a href="/settings" target="_blank">settings</a></li>
 								<li><a href="/logout">log out</a></li>
 							</ul>
 						</li>
@@ -175,7 +175,7 @@
                 <div class = "col-lg-8">
                     <div class="alert alert-dismissible alert-warning fade" id="logfile">
                         <p>
-                            Check Running Log:
+                            Check Log:
                         </p>
                         <p>
                             <a href="get-cdp-log/" class="alert-link" target="_blank">
@@ -299,7 +299,8 @@
                             $('#progressInner').css('width', '100%');
                             $('#progressInner').removeClass("progress-bar-success");
                             $('#progressInner').addClass("progress-bar-danger");
-                            $('#progressInner').html("Failed, Please check log!")
+                            $('#progressInner').html("Failed, Please check log!");
+                            $('#stopCe').trigger("click");
                             return
                         }
 
@@ -309,8 +310,9 @@
                         if (data > 99.999) {
                             clearInterval(progresspump);
                             $('#progressOutter').removeClass("active");
-                            $('#progressInner').html("Success Done!")
-                            return
+                            $('#progressInner').html("Success Done!");
+                            $('#resetCe').removeAttr("disabled");
+                            $('#stopCe').attr("disabled", "disabled");
                         }
                     })
                 }, 1000); // var progresspump
@@ -342,6 +344,8 @@
                 $('#addFileInput').attr("disabled","disabled");
                 $('#startCe').attr("disabled","disabled");
                 $('#stopCe').removeAttr("disabled");
+                $('#progressOutter').removeClass("fade");
+                $('#logfile').removeClass("fade")
             }
 
         </script>

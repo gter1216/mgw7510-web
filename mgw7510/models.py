@@ -17,17 +17,22 @@ class WebUser(models.Model):
     userWorkDir = models.CharField(max_length=100)
 
     # CE Deployment, add default value
-    pakServerIp = models.GenericIPAddressField(max_length=50,
-                                               default="135.251.49.21")
+    pakServerIp = models.GenericIPAddressField(max_length=50, default="135.251.49.21")
+    pakServerUsername = models.CharField(max_length=100, default="xxu")
+    pakServerPasswd = models.CharField(max_length=50, default="initial")
+    pakServerFp = models.CharField(max_length=300, default="/viewstores/public/SLP")
 
-    pakServerUsername = models.CharField(max_length=100,
-                                         default="xxu")
+    seedVMIp = models.GenericIPAddressField(max_length=50, default="172.39.5.116")
+    seedVMUsername = models.CharField(max_length=100, default="root")
+    seedVMPasswd = models.CharField(max_length=50, default="newsys")
+    seedVMOpenrcAbsPath = models.CharField(max_length=300, default="/root/cloud-env/Rainbow-openrc.sh")
+    seedVMKeypairAbsPath = models.CharField(max_length=300, default="/root/cloud-env/BGW-keypair.pem")
 
-    pakServerPasswd = models.CharField(max_length=50,
-                                       default="initial")
-
-    pakServerFp = models.CharField(max_length=500,
-                                   default="/viewstores/public/SLP")
+    yactServerIp = models.GenericIPAddressField(max_length=50, default="135.251.49.19")
+    yactServerUsername = models.CharField(max_length=100, default="darcy")
+    yactServerPasswd = models.CharField(max_length=50, default="initial")
+    yactServerDIFAbsPath = models.CharField(max_length=300, default="/home/darcy/oam_linux_DIF_FILL/7510-CE/C710.ad1115/")
+    yactServerYactAbsPath = models.CharField(max_length=300, default="/home/darcy/YACT/")
 
     userInputFile = models.FileField(null=True,
                                      blank=True,
