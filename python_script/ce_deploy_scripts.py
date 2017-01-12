@@ -20,7 +20,7 @@ WEB_SERVER_PROMPT = '#'
 
 def start_ce_deployment(uname, select_rel, select_pak):
 
-    # ================ global var
+    # ================ declare global var
     user_found = WebUser.objects.get(username=uname)
     uname_dir = uname.replace("@", "_")
     work_dir = user_found.userWorkDir + "/ce_deploy_dir"
@@ -40,10 +40,9 @@ def start_ce_deployment(uname, select_rel, select_pak):
                         'username': user_found.yactServerUsername,
                         'passwd': user_found.yactServerPasswd}
 
-    # ================ initial data
-    ce_deploy_sub.update_progress_bar(user_found, "1")
+    # ================ do initial work
 
-    # ================ initial log file
+    # === initial log file
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s: %(message)s',
                         datefmt='%a, %d %b %Y %H:%M:%S', filename=log_file, filemode='w')
@@ -55,9 +54,13 @@ def start_ce_deployment(uname, select_rel, select_pak):
                  'Release is %s, \n'
                  'Pak is %s \n' % (uname, select_rel, select_pak))
 
+    # ==== initial data
+    ce_deploy_sub.update_progress_bar(user_found, "1")
+
     # ================ Step 0: Environment Pre-Check Start ===================
     logging.info('\nStep0: Environment Check Start!\n')
 
+    # ==== (1) hosts connection check
     hosts_ip = {
         'pak server': pak_server_info['ip'],
         'seed vm': seedvm_info['ip'],
@@ -71,6 +74,9 @@ def start_ce_deployment(uname, select_rel, select_pak):
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
         return
 
+    # ==== (2) check qcow2 cache result
+
+    # ==== (3) evn pre check finish
     ce_deploy_sub.update_progress_bar(user_found, "3")
     logging.info('\nEnvironment Check Passed!\n')
 
