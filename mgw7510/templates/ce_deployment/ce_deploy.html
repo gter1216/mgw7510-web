@@ -299,8 +299,8 @@
                             $('#progressInner').css('width', '100%');
                             $('#progressInner').removeClass("progress-bar-success");
                             $('#progressInner').addClass("progress-bar-danger");
-                            $('#progressInner').html("Failed, Please check log!");
                             $('#stopCe').trigger("click");
+                            $('#progressInner').html("Failed, Please check log!");
                             return
                         }
 
@@ -370,7 +370,7 @@
                     {% if (!i && !o.options.autoUpload) { %}
                         <button class="btn btn-primary start" disabled>
                             <i class="glyphicon glyphicon-upload"></i>
-                            <span>Start</span>
+                            <span>Upload</span>
                         </button>
                     {% } %}
                     {% if (!i) { %}
@@ -453,7 +453,6 @@
         <script src="/static/js/jquery.fileupload-ui.js"></script>
         <!-- The main application script -->
         <script src="/static/js/main.js"></script>
-
 
     </body>
 	

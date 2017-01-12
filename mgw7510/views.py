@@ -5,12 +5,12 @@ from mgw7510.models import WebUser
 from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from python_script import ce_deploy_scripts
+from python_script import ce_deploy_sub
 import shutil
 import time
 import json
 import os
 # import logging
-
 
 # global var
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -359,10 +359,10 @@ def ceCheckPak(request):
 
         print pak_path
 
-        pak_list = ce_deploy_scripts.get_pak_list(pak_ip,
-                                                  pak_username,
-                                                  pak_passwd,
-                                                  pak_path)
+        pak_list = ce_deploy_sub.get_pak_list(pak_ip,
+                                              pak_username,
+                                              pak_passwd,
+                                              pak_path)
         jstr = json.dumps(pak_list)
         return HttpResponse(jstr, content_type='application/json')
 
