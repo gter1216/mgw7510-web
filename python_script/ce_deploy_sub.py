@@ -1,6 +1,7 @@
 from __future__ import division
 from mgw7510.models import WebUser
 from pexpect import pxssh
+import ce_deploy_scripts
 import pexpect
 import logging
 import shutil
@@ -160,7 +161,7 @@ def get_qcow2_md5_from_pak(pak_server_info, qcow2_name, select_rel):
         return
 
 
-def get_seedvm_qcow2_cached_flag(seedvm_info, qcow2_name, qcow2_md5):
+def get_seedvm_qcow2_cached_flag_and_create_image(seedvm_info, qcow2_name, qcow2_md5):
     try:
         seedvm_ip = seedvm_info["ip"]
         seedvm_username = seedvm_info["username"]
@@ -170,37 +171,16 @@ def get_seedvm_qcow2_cached_flag(seedvm_info, qcow2_name, qcow2_md5):
 
         seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
 
-        # create seed vm cache dir
-        # if exists, then rm it and then create it
-        seedvm_cmd = "mkdir " + seedvm_cache_dir
-        seedvm_session.sendline(seedvm_cmd)
-        seedvm_ret = seedvm_session.expect([seedvm_prompt, 'File exists'])
-
-        if seedvm_ret == 0:
-            logging.info('\n%s \n' % seedvm_session.before)
-        elif seedvm_ret == 1:
-            # first match File exists, then match '~#' !!!!!!!!!!IMPORTANT!!!!!!!!!!
-            seedvm_session.expect(seedvm_prompt)
-            logging.info('\n%s \n' % seedvm_session.before)
-            seedvm_session.sendline("rm -rf " + seedvm_work_dir)
-            seedvm_session.expect(seedvm_prompt)
-            logging.info('\n%s \n' % seedvm_session.before)
-            seedvm_session.sendline(seedvm_cmd)
-            seedvm_session.expect(seedvm_prompt)
-            logging.info('\n%s \n' % seedvm_session.before)
-            seedvm_session.sendline("cd " + seedvm_work_dir)
-            seedvm_session.expect(seedvm_prompt)
-            logging.info('\n%s \n' % seedvm_session.before)
-
-        # upload qcow2 to "seedvm_work_dir"
-
-        seedvm_cmd3 = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir + "/*.qcow2 " + "./"
-        seedvm_session.sendline(seedvm_cmd3)
+        # upload script seedvm_cache_check.sh to seedvm /root/
+        sh_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/seedvm_cache_check.sh"
+        seedvm_scp_cmd = "scp -r " + ce_deploy_scripts.WEB_SERVER_USERNAME + "@" + \
+                         ce_deploy_scripts.WEB_SERVER_IP + ":" + sh_file_path + " /root/"
+        seedvm_session.sendline(seedvm_scp_cmd)
         seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=100)
         if seedvm_ret == 0:
             raise Exception("\nscp to webserver timeout \n")
         elif seedvm_ret == 1:
-            seedvm_session.sendline(WEB_SERVER_PASSWORD)
+            seedvm_session.sendline(ce_deploy_scripts.WEB_SERVER_PASSWORD)
         elif seedvm_ret == 2:
             logging.info('\n%s \n' % seedvm_session.before)
             seedvm_session.sendline("yes")
@@ -209,38 +189,55 @@ def get_seedvm_qcow2_cached_flag(seedvm_info, qcow2_name, qcow2_md5):
                 raise Exception("\nscp to webserver timeout \n")
             elif seedvm_ret == 1:
                 logging.info('\n%s \n' % seedvm_session.before)
-                seedvm_session.sendline(WEB_SERVER_PASSWORD)
-
-        update_progbar_by_scp(user=user_found,
-                              session=seedvm_session,
-                              prompt=seedvm_prompt,
-                              scp_step=3,
-                              progbar_total_incr=35)
-
-        ############## step3: Create Image
-        logging.info('\nStep3: create image \n')
-        seedvm_session.sendline("cd " + seedvm_work_dir)
+                seedvm_session.sendline(ce_deploy_scripts.WEB_SERVER_PASSWORD)
         seedvm_session.expect(seedvm_prompt)
         logging.info('\n%s \n' % seedvm_session.before)
 
-        seedvm_session.sendline("source " + user_found.seedVMOpenrcAbsPath)
+        # perform shell script
+        # $1 ===> /root/auto_ce_deploy
+        # $2 ===> qcow2_name: nokia_a.qcow2
+        # $3 ===> qcow2_md5: d41d8cd98f00b204e9800998ecf8427e
+        # $4 ===> disk_limit: 15
+        # $5 ===> source_file: /root/cloud-env/Rainbow-openrc.sh
+        seedvm_cmd = "sh /root/seedvm_cache_check.sh " + "/root/auto_ce_deploy " + qcow2_name + " " + \
+                     qcow2_md5 + " " + ce_deploy_scripts.SEEDVM_DISK_LIMIT + " " + seedvm_info["openrc"]
+        seedvm_session.sendline(seedvm_cmd)
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+        seedvm_cmd = "echo $?"
+        seedvm_session.sendline(seedvm_cmd)
+        seedvm_session.expect(seedvm_prompt)
+        result = seedvm_session.before
+        logging.info('\n%s \n' % result)
+        exitcode = result.split("\r\n")
+        exitcode = exitcode[1]
+        logging.info('\n exit code is: %s \n' % exitcode)
+
+        # remove shell script
+        seedvm_cmd = "rm -rf /root/seedvm_cache_check.sh"
+        seedvm_session.sendline(seedvm_cmd)
         seedvm_session.expect(seedvm_prompt)
         logging.info('\n%s \n' % seedvm_session.before)
 
-        create_glance_cmd = "glance image-create --name=" + select_pak.strip(".qcow2") + " --file=" + select_pak + \
-                            " --disk-format=qcow2  --container-format=bare  --is-public=false --is-protected=false"
-        logging.info('\n%s \n' % create_glance_cmd)
-        seedvm_session.sendline(create_glance_cmd)
-        seedvm_ret = seedvm_session.expect(['Errno', seedvm_prompt], timeout=50)
-        if seedvm_ret == 0:
-            logging.info('\n%s \n' % seedvm_session.before)
-            raise Exception("\ncreate glance image failed \n")
-        elif seedvm_ret ==1:
-            logging.info('\n%s \n' % seedvm_session.before)
+        seedvm_session.close()
+
+        if exitcode == 1:
+            logging.info('\nno cached qcow2 found on seedvm  %s \n')
+            return False
+        elif exitcode == 2:
+            logging.error('\nno enough disk storage on seedvm, please check! %s \n')
+            return None
+        elif exitcode == 3:
+            logging.error('\ncreate image failed, please check! %s \n')
+            return None
+        elif exitcode == 4:
+            logging.error('\nfind cached qcow2 on seedvm %s \n')
+            return True
 
     except Exception, e:
         logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
-        user_found.progressBarData = "101"
-        user_found.save()
-        seedvm_session.close()
-        return
+        return None
+
+
+def get_webserver_qcow2_cached_flag(qcow2_name, qcow2_md5):
+    pass

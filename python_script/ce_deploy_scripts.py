@@ -17,6 +17,9 @@ WEB_SERVER_USERNAME = "root"
 WEB_SERVER_PASSWORD = "newsys"
 WEB_SERVER_PROMPT = '#'
 
+# allowed minimal seed vm disk size, Gb
+SEEDVM_DISK_LIMIT = "15"
+
 
 def start_ce_deployment(uname, select_rel, select_pak):
 
@@ -98,7 +101,16 @@ def start_ce_deployment(uname, select_rel, select_pak):
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
         return
 
-    qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag(seedvm_info, select_pak, qcow2_md5)
+    qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag_and_create_image(
+        seedvm_info, select_pak, qcow2_md5)
+
+    if not qcow2_cached_seedvm_flag:
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        return
+    elif qcow2_cached_seedvm_flag is not True:
+        # there is no cached qcow2 on seedvm, check if cached qcow2 exists on web server
+        qcow2_cached_webserver_flag = ce_deploy_sub.get_webserver_qcow2_cached_flag(select_pak, qcow2_md5)
+
 
     # if qcow2_cached_seedvm_flag is not True:
     #     qcow2_cached_webserver_flag = get_webserver_qcow2_cached_flag(qcow2_name, qcow2_md5)
