@@ -20,7 +20,7 @@ WEB_SERVER_PROMPT = '#'
 
 def start_ce_deployment(uname, select_rel, select_pak):
 
-    # ================ declare global var
+    # ================ global var inital ================================
     user_found = WebUser.objects.get(username=uname)
     uname_dir = uname.replace("@", "_")
     work_dir = user_found.userWorkDir + "/ce_deploy_dir"
@@ -29,20 +29,29 @@ def start_ce_deployment(uname, select_rel, select_pak):
     pak_server_info = {'ip': user_found.pakServerIp,
                        'username': user_found.pakServerUsername,
                        'passwd': user_found.pakServerPasswd,
+                       "prompt": '\$',
                        "fp": user_found.pakServerFp}
 
     seedvm_info = {'ip': user_found.seedVMIp,
                    'username': user_found.seedVMUsername,
                    'passwd': user_found.seedVMPasswd,
+                   'prompt': '#',
+                   'openrc': user_found.seedVMOpenrcAbsPath,
+                   'cache_dir': "/root/cache_dir",
                    'work_dir': "/root/" + uname_dir}
 
     yact_server_info = {'ip': user_found.yactServerIp,
                         'username': user_found.yactServerUsername,
-                        'passwd': user_found.yactServerPasswd}
+                        'passwd': user_found.yactServerPasswd,
+                        'prompt': '\$'}
 
-    # ================ do initial work
+    ce_deploy_sub.update_progress_bar(user_found, "1")
 
-    # === initial log file
+    qcow2_cached_seedvm_flag = False
+    qcow2_cached_webserver_flag = False
+
+    # ================ initial log file ====================================
+
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s: %(message)s',
                         datefmt='%a, %d %b %Y %H:%M:%S', filename=log_file, filemode='w')
@@ -54,10 +63,11 @@ def start_ce_deployment(uname, select_rel, select_pak):
                  'Release is %s, \n'
                  'Pak is %s \n' % (uname, select_rel, select_pak))
 
-    # ==== initial data
-    ce_deploy_sub.update_progress_bar(user_found, "1")
+    logging.info('\npak server info: %s \n' % pak_server_info)
+    logging.info('\nseedvm info: %s \n' % seedvm_info)
+    logging.info('\nyact server info: %s \n' % yact_server_info)
 
-    # ================ Step 0: Environment Pre-Check Start ===================
+    # ================ Step 0: Environment Pre-Check Start =================
     logging.info('\nStep0: Environment Check Start!\n')
 
     # ==== (1) hosts connection check
@@ -70,23 +80,42 @@ def start_ce_deployment(uname, select_rel, select_pak):
     env_check_result = netcheck.get_host_conn_state(hosts_ip)
 
     if env_check_result is False:
-        logging.info('\nEnvironment Check Failed!\n')
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
         return
 
-    # ==== (2) check qcow2 cache result
-
-    # ==== (3) evn pre check finish
+    # ==== (2) evn pre check finish
     ce_deploy_sub.update_progress_bar(user_found, "3")
     logging.info('\nEnvironment Check Passed!\n')
 
-    # ================ Step 0: Environment Pre-Check End ===================
+    # ================ Step 1: check qcow2 cache =================
+    logging.info('\nStep1: check qcow2 cache!\n')
+    qcow2_md5 = ce_deploy_sub.get_qcow2_md5_from_pak(pak_server_info, select_pak, select_rel)
 
-    ce_deploy_sub.deployment_success(user_found, perform_clean_work="no")
-    return
+    logging.info('\nqcow2 md5 on pak is: %s \n' % qcow2_md5)
 
+    if not qcow2_md5:
+        # failed to get md5 on pak, ssh problem.
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        return
 
+    qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag(seedvm_info, select_pak, qcow2_md5)
 
+    # if qcow2_cached_seedvm_flag is not True:
+    #     qcow2_cached_webserver_flag = get_webserver_qcow2_cached_flag(qcow2_name, qcow2_md5)
+    #
+    #
+    # # ================ Step 2: download csar/qcow2, upload qcow2 and create image  =================
+    # if qcow2_cached_seedvm_flag is True:
+    #     # download csar to web server
+    #     # create image on seedvm
+    #     pass
+    # elif qcow2_cached_webserver_flag is True:
+    #     # download csar to web server
+    #     # upload qcow2 to seedvm and create image
+    #     pass
+    # else:
+    #     # download csar and qcow2 to web server
+    #     # upload qcow2 to seedvm and create image
 
 
 
@@ -543,7 +572,8 @@ def start_ce_deployment(uname, select_rel, select_pak):
 #     user_found.progressBarData = "100"
 #     user_found.save()
 
-
+    ce_deploy_sub.deployment_success(user_found, perform_clean_work="no")
+    return
 
 
 
