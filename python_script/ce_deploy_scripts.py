@@ -19,6 +19,7 @@ WEB_SERVER_PROMPT = '#'
 
 # allowed minimal seed vm disk size, Gb
 SEEDVM_DISK_LIMIT = "15"
+WEB_SERVER_DISK_LIMIT = "200"
 
 
 def start_ce_deployment(uname, select_rel, select_pak):
