@@ -41,7 +41,6 @@ def start_ce_deployment(uname, select_rel, select_pak):
                    'passwd': user_found.seedVMPasswd,
                    'prompt': '#',
                    'openrc': user_found.seedVMOpenrcAbsPath,
-                   'cache_dir': "/root/cache_dir",
                    'work_dir': "/root/" + uname_dir}
 
     yact_server_info = {'ip': user_found.yactServerIp,
@@ -105,13 +104,16 @@ def start_ce_deployment(uname, select_rel, select_pak):
     qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag_and_create_image(
         seedvm_info, select_pak, qcow2_md5)
 
-    if not qcow2_cached_seedvm_flag:
+    logging.info('\nqcow2_cached_seedvm_flag is: %s \n' % qcow2_cached_seedvm_flag)
+
+    if qcow2_cached_seedvm_flag is None:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
         return
     elif qcow2_cached_seedvm_flag is not True:
         # there is no cached qcow2 on seedvm, check if cached qcow2 exists on web server
         qcow2_cached_webserver_flag = ce_deploy_sub.get_webserver_qcow2_cached_flag(select_pak, qcow2_md5)
 
+    logging.info('\nqcow2_cached_webserver_flag is: %s \n' % qcow2_cached_webserver_flag)
 
     # if qcow2_cached_seedvm_flag is not True:
     #     qcow2_cached_webserver_flag = get_webserver_qcow2_cached_flag(qcow2_name, qcow2_md5)

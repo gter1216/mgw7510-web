@@ -2,6 +2,7 @@ from __future__ import division
 from mgw7510.models import WebUser
 from pexpect import pxssh
 import ce_deploy_scripts
+import commands
 import pexpect
 import logging
 import shutil
@@ -167,7 +168,6 @@ def get_seedvm_qcow2_cached_flag_and_create_image(seedvm_info, qcow2_name, qcow2
         seedvm_username = seedvm_info["username"]
         seedvm_passwd = seedvm_info["passwd"]
         seedvm_prompt = seedvm_info["prompt"]
-        seedvm_cache_dir = seedvm_info["cache_dir"]
 
         seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
 
@@ -221,17 +221,18 @@ def get_seedvm_qcow2_cached_flag_and_create_image(seedvm_info, qcow2_name, qcow2
 
         seedvm_session.close()
 
+        exitcode = int(exitcode)
         if exitcode == 1:
-            logging.info('\nno cached qcow2 found on seedvm  %s \n')
+            logging.info('\nno cached qcow2 found on seedvm \n')
             return False
         elif exitcode == 2:
-            logging.error('\nno enough disk storage on seedvm, please check! %s \n')
+            logging.error('\nno enough disk storage on seedvm, please check! \n')
             return None
         elif exitcode == 3:
-            logging.error('\ncreate image failed, please check! %s \n')
+            logging.error('\ncreate image failed, please check! \n')
             return None
         elif exitcode == 4:
-            logging.error('\nfind cached qcow2 on seedvm %s \n')
+            logging.error('\nfind cached qcow2 on seedvm \n')
             return True
 
     except Exception, e:
@@ -240,4 +241,12 @@ def get_seedvm_qcow2_cached_flag_and_create_image(seedvm_info, qcow2_name, qcow2
 
 
 def get_webserver_qcow2_cached_flag(qcow2_name, qcow2_md5):
-    pass
+    shell_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/webserver_cache_check.sh"
+
+    ce_deploy_dir = ce_deploy_scripts.BASE_DIR + "/cache_dir/ce_deploy"
+
+    shell_cmd = "sh " + shell_file_path + " " + ce_deploy_dir + " " + \
+                qcow2_name + " " + qcow2_md5 + " " + ce_deploy_scripts.SEEDVM_DISK_LIMIT
+    output = commands.getstatusoutput(shell_cmd)
+    logging.info('\n%s\n' % output)
+    exitcode = output[0]
