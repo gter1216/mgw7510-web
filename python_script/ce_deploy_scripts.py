@@ -111,6 +111,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     # ================ check qcow2 cache =================
     logging.info('\nStep1: check cached qcow2 on seedvm!\n')
+
     qcow2_md5 = ce_deploy_sub.get_qcow2_md5_from_pak(pak_server_info, select_pak, select_rel)
 
     logging.info('\nqcow2 md5 on pak is: %s \n' % qcow2_md5)

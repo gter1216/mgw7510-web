@@ -591,14 +591,3 @@ def make_yaml_scripts(yact_server_info, user_input_file_name, user_upload_dir):
     except Exception, e:
         logging.error('\nproblem during ssh to yact server: %s \n' % str(e))
         return False
-
-
-
-
-
-
-
-
-
-
-
