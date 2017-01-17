@@ -1,8 +1,0 @@
-
-/*将表单的label左对齐,覆盖 bootstrap原生样式 */
-
-@media (min-width: 768px) {
-  .form-horizontal .control-label {
-    text-align: left; !important
-  }
-}
