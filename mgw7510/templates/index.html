@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--
+        	author：xuxiao
+        	date：2016-12-05
+        	description: develped for Nokia MGW 7510 Auto Deployment
+        -->
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <!-- bootstrap 提供的缩放功能，在移动设备上可以禁用缩放功能，
+	                           这样看起来更像是原生的 APP 应用 -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+		<title>Nokia MGW 7510 Auto Deployment!</title>
+
+
+        <link rel="stylesheet" href="/static/css/bootstrap2.min.css" />
+		<!-- 自定义 css 文件-->
+		<link rel="stylesheet" href="/static/css/mystyle.css" />
+       	
+       	<!-- 引用 bootstrap 之前必须先引用 jqurey --> 		
+		<script type="text/javascript" src="/static/js/jquery-3.1.1.min.js" ></script>
+		<script type="text/javascript" src="/static/js/bootstrap.min.js" ></script>
+		<!-- 自定义 JavaScript 文件-->
+		<script type="text/javascript" src="/static/js/myscript.js" ></script>
+	</head>
+	
+	<body>
+		
+		<!-- Navigation ========================================================= -->
+		<nav class="navbar navbar-fixed-top" role="navigation">
+		<!--<nav class="navbar navbar-static-top" role="navigation">-->
+			<div class="container-fluid">
+				<div class="navbar-header navbar-left">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<!--<a class="navbar-brand">
+						<img src="img/nokia_logo.png" style = "height: 25px;margin-top: -5px;" > 
+					</a>
+					<a class="navbar-brand">
+						Nokia MGW 7510 Auto Deployment
+					</a>-->
+				</div> <!-- navbar-header-->
+
+				<div id="navbar" class="navbar-collapse collapse">
+					<form class="navbar-form navbar-right" role="form" method="post" id="hpForm" action="signin/">
+						<div class="form-group form-group-sm">
+							<input type="text" placeholder="Username(Email)" class="form-control" name="username" id="hpUsername">
+						</div>
+						<div class="form-group form-group-sm">
+							<input type="password" placeholder="Password" name="password" class="form-control" autocomplete="off">
+						</div>
+						<button type="submit" class="btn btn-success btn-sm" id="hpSignin">
+							Sign In
+						</button>
+						<a class="btn btn-warning btn-sm" href="/register">
+							Register
+						</a>
+						<a class="btn btn-danger btn-sm" action="/forget-password/" href="#" id="hpForgetpassword">
+							Forgot Password
+						</a>
+						<!--<button type="submit" class="btn btn-warning btn-sm">Register</button>-->
+						<!--<button type="submit" class="btn btn-danger btn-sm" name="hp-forgetpassword">Forgot Password</button>-->
+					</form>
+				</div><!-- div id="navbar" -->
+				
+		    </div> <!-- container-fluid -->
+		</nav>
+		
+		<!-- padding the fixed top nav bar, 50px -->
+		<!--<div style="height: 50px;"></div>-->
+        
+        <!-- Carousel =========================================================== -->
+	    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+	    	<ol class="carousel-indicators">
+	    		<li data-slide-to="0" data-target="#myCarousel" class="active"></li>
+	    		<li data-slide-to="1" data-target="#myCarousel"></li>
+	    		<li data-slide-to="2" data-target="#myCarousel"></li>
+	    	</ol>
+	    	<div class="carousel-inner" role="listbox">
+	    		<div class="item active">
+	    			<img src="/static/img/myCarousel_1.jpg" alt="First slide">
+	    			<div class="carousel-caption">   				
+	    				<p>
+	    					<a href="/under-construction" style="color: dimgray; font-size: x-large;">
+	    						Nokia MGW 7510 Auto Deployment Web User Guide
+	    					</a>
+	    				</p>
+	    			    <!--<p>
+	    			    	<a class="btn btn-default btn-primary" href="#" role="button">Read More</a>
+	    			    </p>-->
+	    			</div>
+	    		</div>
+                <div class="item">
+                    <img src="/static/img/myCarousel_2.jpg" alt="Second slide">
+                        <div class="carousel-caption">
+                        	<p>
+                        		<a href="#" style="color: white; font-size: x-large;" id="ceOnline">
+                        			MGW 7510 Cloud Edition is Online
+	    					    </a>
+	    				    </p>
+                        </div>
+                </div>
+                <div class="item">
+                    <img src="/static/img/myCarousel_6.jpg" alt = "Third slide">
+                        <div class="carousel-caption">
+                        	<p>
+                        		<a href="/under-construction" style="color: white; font-size: x-large;">
+                        			iSBC/iSBC Cloud is Under Construction
+	    					    </a>
+	    				    </p>
+                      </div>
+                </div>
+	        </div> <!-- carousel-inner -->
+	    	
+	    	<a class="left carousel-control" href="#myCarousel" data-slide="prev">
+	    		<span class="glyphicon glyphicon-chevron-left"></span>
+	    		<span class="sr-only">Previous</span>
+	    	</a>
+	    	
+	    	<a class="right carousel-control" href="#myCarousel" data-slide="next">
+	    		<span class="glyphicon glyphicon-chevron-right"></span>
+	    		<span class="sr-only">Next</span>
+	    	</a>
+	    	
+	    </div><!-- carousel slide -->
+	    
+	    <!-- padding -->
+	    <div style="height: 30px;"></div>
+	    
+	    <!-- Features =========================================================== -->
+        <div class="container-fluid">
+        	<div class="row">
+        		<div class="col-lg-4">
+        			<!--<img class="img-circle" src="img/ce_icon.png" style="height: 160px; width: 160px">-->
+        			<!--<a href="#">-->
+        			<!--<img class="center-block" src="/static/img/ce_icon_meitu_5.jpg">-->
+        			<!--</a>-->
+					<img class="center-block" src="/static/img/ce_icon_meitu_5.jpg">
+        			<h3 class="text-center">
+        				<a href="/ce-deploy" id="ceDeployment">
+        					CE Deployment
+        				</a>
+        			</h3>
+                </div>
+                <div class="col-lg-4">
+                	<!--<a href="/under-construction">-->
+                	<img class="center-block" src="/static/img/rms_icon_meitu_6.jpg">
+                	<!--</a>-->
+                	<h3 class="text-center" >
+        				<a href="/under-construction">
+        					iSBC/RMS Deployment
+        				</a>
+        			</h3>
+                </div>
+                <div class="col-lg-4">
+                	<!--<a href="/under-construction">-->
+                	<img class="center-block" src="/static/img/iSBC_cloud_icon.png">
+                	<!--</a>-->
+                	<h3 class="text-center">
+        				<a href="/under-construction">
+        					iSBC-Cloud Deployment
+        				</a>
+        			</h3>
+                </div>
+           </div> <!-- row -->
+        </div> <!-- container-fluid -->
+        
+        <!-- Cut-off line -->
+        <!--<hr></hr>-->
+        
+        <!-- padding -->
+        <div style="height: 65px;"></div>
+        
+	    <!-- Footer: Address & Contact Info ===================================== -->	
+        <div class="panel-footer">
+        	<strong>Nokia, Inc. Shanghai, China</strong>
+				<br> 
+					MGW 7510, Network Management Team. Contact:
+					<a href="mailto:Xiao.A.Xu@alcatel-sbell.com.cn">
+						Xiao.A.Xu@alcatel-sbell.com.cn
+					</a>
+					<br>
+						Copyright © 2016  Nokia.inc All Rights Reserved
+					</br>
+				</br>
+        </div>
+		
+	</body>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+		    $('#hpForm').submit(function(event){
+		        // prevent submit button handler, exec the post action
+		        event.preventDefault();
+                $.post(
+                    $("#hpForm").attr('action'),
+                    $("#hpForm").serialize(),
+                    function(result){
+                        if(result == "ok"){
+                            var hun = $("#hpUsername").val();
+                            window.location.href = "/login-in" + "/" + hun
+                        }
+                        else{
+                            alert(result);
+                            window.location.reload();
+                        }
+                    },
+                    'html'
+                )
+            });
+
+		    $('#hpForgetpassword').click(function(event){
+		        event.preventDefault();
+		        $.post(
+                    $("#hpForgetpassword").attr('action'),
+                    $("#hpForm").serialize(),
+                    function(result){
+                        alert(result)
+                    },
+                    'html'
+                )
+			})
+
+            $('#ceDeployment,#ceOnline').click(function(event){
+                event.preventDefault();
+		        alert("Please login first!");
+			})
+
+        });
+
+	</script>
+
+</html>

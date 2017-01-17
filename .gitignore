@@ -1,0 +1,10 @@
+*.log.*
+*.pyc
+*.pid
+*.db
+/.idea/
+/UserWorkDir/
+/media/
+/log/
+/cache_dir/
+/YACT/
