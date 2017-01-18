@@ -154,9 +154,9 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
         # upload qcow2 to webserver and create image,
         # and then move qcow2 from buffer to cache
-        logging.info('\nStep4: upload qcow2 to webserver and create image\n')
+        logging.info('\nStep4: upload qcow2 to seedvm and create image\n')
         upload_result = ce_deploy_sub.upload_qcow2_to_seed_create_image(
-            user_found, seedvm_info, select_pak)
+            user_found, seedvm_info, select_pak, uname_dir)
 
         if upload_result is False:
             ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
@@ -177,7 +177,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
         ce_deploy_sub.update_progress_bar(user_found, "45")
         # upload qcow2 to webserver and create image, and then
         # and then move qcow2 from buffer to cache
-        logging.info('\nStep4: upload qcow2 to webserver and create image\n')
+        logging.info('\nStep4: upload qcow2 to seedvm and create image\n')
         upload_result = ce_deploy_sub.upload_qcow2_to_seed_create_image(
             user_found, seedvm_info, select_pak, uname_dir)
 
@@ -204,12 +204,12 @@ def start_ce_deployment(uname, select_rel, select_pak):
     # ================ make yaml and scripts =================
     logging.info('\nStep5: make yaml and scripts start\n')
 
-    make_yaml_result = ce_deploy_sub.make_yaml_scripts(
-        yact_server_info, user_input_file_name, user_upload_dir)
-
-    if make_yaml_result is False:
-        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
-        return
+    # make_yaml_result = ce_deploy_sub.make_yaml_scripts(
+    #     yact_server_info, user_input_file_name, user_upload_dir)
+    #
+    # if make_yaml_result is False:
+    #     ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+    #     return
 
 
 # clear log_file

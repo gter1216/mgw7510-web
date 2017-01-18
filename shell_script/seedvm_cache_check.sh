@@ -5,11 +5,7 @@
 ################### Date:   2017.01.12 ####################
 ###########################################################
 
-<<<<<<< HEAD
 # This script is used to build cache for qcow2 on seedvm
-=======
-# This script is used to build cache for qcow2 on seedvm 
->>>>>>> 7b78cdef8c336a654e80526361612d15bab41ad1
 # if there is no cache. If there is cached qcow2 and md5
 # verification passed, then create image on openstack
 # and then return result to python main calling process.
@@ -20,14 +16,9 @@
 # $3 ===> qcow2_md5
 # $4 ===> disk_limit
 # $5 ===> source_file
-<<<<<<< HEAD
 # $6 ===> uname
 
 # return result:
-=======
-
-# return result: 
->>>>>>> 7b78cdef8c336a654e80526361612d15bab41ad1
 # 1 ====> no cache qcow2 find;
 # 2 ====> error occurred, no enough disk storage;
 # 3 ====> cached qcow2 find and create image failed
@@ -38,10 +29,7 @@ qcow2_name=$2
 qcow2_md5=$3
 disk_limit=$4
 source_file=$5
-<<<<<<< HEAD
 uname=$6
-=======
->>>>>>> 7b78cdef8c336a654e80526361612d15bab41ad1
 
 buffer_dir="buffer_dir"
 cache_dir="cache_dir"
