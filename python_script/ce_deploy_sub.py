@@ -460,134 +460,14 @@ def upload_qcow2_to_seed_create_image(user, seedvm_info, select_pak, uname_dir):
         return False
 
 
-def make_yaml_scripts(yact_server_info, user_input_file_name, user_upload_dir):
-    try:
-        yact_server_ip = yact_server_info["ip"]
-        yact_server_username = yact_server_info["username"]
-        yact_server_passwd = yact_server_info["passwd"]
-        yact_prompt = yact_server_info["prompt"]
+def make_yaml_scripts(uname_dir):
 
-        yact_session = create_ssh_session(yact_server_ip, yact_server_username, yact_server_passwd, yact_prompt)
+    shell_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/make_yaml_script.sh"
 
-        yact_session.close()
-
-        # yact_scp_cmd = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + new_user_input_target + " ./"
-        # yact_session.sendline(yact_scp_cmd)
-        # yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=50)
-        # if yact_ret == 0:
-        #     raise Exception("\nscp to webserver timeout \n")
-        # elif yact_ret == 1:
-        #     yact_session.sendline(WEB_SERVER_PASSWORD)
-        # elif yact_ret == 2:
-        #     logging.info('\n%s \n' % yact_session.before)
-        #     yact_session.sendline("yes")
-        #     yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=50)
-        #     if yact_ret == 0:
-        #         raise Exception("\nscp to webserver timeout \n")
-        #     elif yact_ret == 1:
-        #         logging.info('\n%s \n' % yact_session.before)
-        #         yact_session.sendline(WEB_SERVER_PASSWORD)
-        #
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-
-        # # rename the user input file
-        # new_user_input_file_name = uname_dir + '_' + user_input_file_name
-        # new_user_input_source = user_input_target
-        # new_user_input_target = user_upload_dir + '/' + new_user_input_file_name
-        # shutil.move(new_user_input_source, new_user_input_target)
-        #
-        # # upload user input to yact server dif path
-        # yact_session.sendline("cd " + yact_server_dif_path)
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # yact_scp_cmd = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + new_user_input_target + " ./"
-        # yact_session.sendline(yact_scp_cmd)
-        # yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=50)
-        # if yact_ret == 0:
-        #     raise Exception("\nscp to webserver timeout \n")
-        # elif yact_ret == 1:
-        #     yact_session.sendline(WEB_SERVER_PASSWORD)
-        # elif yact_ret == 2:
-        #     logging.info('\n%s \n' % yact_session.before)
-        #     yact_session.sendline("yes")
-        #     yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=50)
-        #     if yact_ret == 0:
-        #         raise Exception("\nscp to webserver timeout \n")
-        #     elif yact_ret == 1:
-        #         logging.info('\n%s \n' % yact_session.before)
-        #         yact_session.sendline(WEB_SERVER_PASSWORD)
-        #
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # user_found.progressBarData = "82"
-        # user_found.save()
-        #
-        # # generate output by DIF tool
-        # # python dif_fill.py -i input-dif.xlsm -u user-input-xuxiao.xlsx -o output-xuxiao.xlsm
-        # # cp output-xuxiao.xlsm  /home/darcy/YACT/
-        #
-        # yact_output_name = "output_" + new_user_input_file_name.strip("xlsx") + "xlsm"
-        # yact_gen_output_cmd = "python dif_fill.py -i input-dif.xlsm -u " + \
-        #                       new_user_input_file_name + " -o " + yact_output_name
-        #
-        # logging.info('\n%s \n' % yact_gen_output_cmd)
-        #
-        # yact_session.sendline(yact_gen_output_cmd)
-        # yact_session.expect(yact_prompt, timeout=300)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # yact_session.sendline("mv " + yact_output_name + " " + yact_server_yact_path)
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # # remove uploaded user input file
-        # yact_session.sendline("rm -rf " + new_user_input_file_name)
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # user_found.progressBarData = "84"
-        # user_found.save()
-        #
-        # # generate ne_xxx  YAML & SCRIPTS
-        # yact_session.sendline("cd " + yact_server_yact_path)
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # # ./yact.sh gen-by-dif output-xuxiao.xlsm 7510-CE C710.ad1115
-        # yact_yaml_cmd = "./yact.sh " + "gen-by-dif " + yact_output_name + " 7510-CE C710.ad1115"
-        # yact_session.sendline(yact_yaml_cmd)
-        # yact_session.expect(yact_prompt, timeout=100)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # # delete output xlsm file
-        # yact_session.sendline("rm -rf " + yact_output_name)
-        # yact_session.expect(yact_prompt)
-        # logging.info('\n%s \n' % yact_session.before)
-        #
-        # # download ne_xxx to user_upload_dir
-        # yact_scp_cmd = "scp -r " + "./ne-xxx/ " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + user_upload_dir
-        # yact_session.sendline(yact_scp_cmd)
-        # yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=5)
-        # if yact_ret == 0:
-        #     raise Exception("\nscp to webserver timeout \n")
-        # elif yact_ret == 1:
-        #     yact_session.sendline(WEB_SERVER_PASSWORD)
-        # elif yact_ret == 2:
-        #     logging.info('\n%s \n' % yact_session.before)
-        #     yact_session.sendline("yes")
-        #     yact_ret = yact_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=5)
-        #     if yact_ret == 0:
-        #         raise Exception("\nscp to webserver timeout \n")
-        #     elif yact_ret == 1:
-        #         logging.info('\n%s \n' % yact_session.before)
-        #         yact_session.sendline(WEB_SERVER_PASSWORD)
-        #
-        # yact_session.expect(yact_prompt, timeout=200)
-        # logging.info('\n%s \n' % yact_session.before)
-
-    except Exception, e:
-        logging.error('\nproblem during ssh to yact server: %s \n' % str(e))
+    shell_cmd = "sh " + shell_file_path + " " + uname_dir
+    output = commands.getstatusoutput(shell_cmd)
+    logging.info('\n%s\n' % output[1])
+    if output[0] != 0:
+        logging.error('\nmake yaml and script failed\n' % key)
         return False
+    return True

@@ -204,12 +204,11 @@ def start_ce_deployment(uname, select_rel, select_pak):
     # ================ make yaml and scripts =================
     logging.info('\nStep5: make yaml and scripts start\n')
 
-    # make_yaml_result = ce_deploy_sub.make_yaml_scripts(
-    #     yact_server_info, user_input_file_name, user_upload_dir)
-    #
-    # if make_yaml_result is False:
-    #     ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
-    #     return
+    make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir)
+
+    if make_yaml_result is False:
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        return
 
 
 # clear log_file
