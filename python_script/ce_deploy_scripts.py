@@ -28,6 +28,8 @@ SEEDVM_WORK_DIR = "/root/auto_ce_deploy"
 SEEDVM_BUFFER_dIR = SEEDVM_WORK_DIR + "/buffer_dir"
 SEEDVM_CACHE_dIR = SEEDVM_WORK_DIR + "/cache_dir"
 
+YACT_COMMON_TOOL_USER_DIR = BASE_DIR + "/YACT/UserDir"
+
 
 def start_ce_deployment(uname, select_rel, select_pak):
 
@@ -79,6 +81,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
     logging.info('\nyact server info: %s \n' % yact_server_info)
 
     # ================ move user input file to user dir
+    # ================ and get some parameters from user input
 
     user_input_file_name = user_found.userInputFileName
 
@@ -88,6 +91,14 @@ def start_ce_deployment(uname, select_rel, select_pak):
     shutil.move(user_input_source, user_input_target)
 
     logging.info('\nuser uploaded file "%s" is ready to use \n\n' % user_input_file_name)
+
+    handle_user_input_result = ce_deploy_sub.handle_user_input(user_input_target, uname_dir)
+
+    if handle_user_input_result is None:
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        return
+
+    (sheet_name, system_name, sw_image_name) = handle_user_input_result
 
     # ================ Environment Pre-Check Start =================
     logging.info('\nStep0: Environment Check Start!\n')
@@ -122,7 +133,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
         return
 
     qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag_and_create_image(
-        uname_dir, seedvm_info, select_pak, qcow2_md5)
+        uname_dir, seedvm_info, select_pak, qcow2_md5, sw_image_name)
 
     if qcow2_cached_seedvm_flag is None:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
@@ -156,7 +167,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
         # and then move qcow2 from buffer to cache
         logging.info('\nStep4: upload qcow2 to seedvm and create image\n')
         upload_result = ce_deploy_sub.upload_qcow2_to_seed_create_image(
-            user_found, seedvm_info, select_pak, uname_dir)
+            user_found, seedvm_info, select_pak, sw_image_name)
 
         if upload_result is False:
             ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
@@ -203,7 +214,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
     # ================ make yaml and scripts, replace csar =================
     logging.info('\nStep5: make yaml and scripts start\n')
 
-    make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir)
+    make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir, sheet_name)
 
     if make_yaml_result is False:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
@@ -213,9 +224,10 @@ def start_ce_deployment(uname, select_rel, select_pak):
     logging.info('\n make yaml and scripts successful\n')
 
     # ================ replaced csar is ready, upload to seedvm =============
-    logging.info('\nStep6: start to upload csar to seedvm, create stack\n')
+    logging.info('\nStep6: start to upload csar to seedvm\n')
 
-    create_stack_result = ce_deploy_sub.create_stack(uname_dir)
+    create_stack_result = ce_deploy_sub.create_stack(
+        seedvm_info, user_upload_dir, system_name)
 
     if create_stack_result is False:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")

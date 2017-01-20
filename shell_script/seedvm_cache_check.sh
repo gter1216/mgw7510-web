@@ -17,6 +17,7 @@
 # $4 ===> disk_limit
 # $5 ===> source_file
 # $6 ===> uname
+# $7 ===> sw_image_name
 
 # return result:
 # 1 ====> no cache qcow2 find;
@@ -30,6 +31,7 @@ qcow2_md5=$3
 disk_limit=$4
 source_file=$5
 uname=$6
+sw_image_name=$7
 
 buffer_dir="buffer_dir"
 cache_dir="cache_dir"
@@ -67,12 +69,12 @@ create_dir(){
 create_image(){
       #source $2
       . $2
-      qcow2_name_local=$1
       uname_local=$3
-      pure_qcow2_name=${qcow2_name_local%.*}"_auto_"${uname_local}
-      echo "glance image-create --name=$pure_qcow2_name --file=$1 --disk-format=qcow2 \
+      #pure_qcow2_name=${qcow2_name_local%.*}"_auto_"${uname_local}
+      sw_image_name=$1
+      echo "glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
             --container-format=bare --is-public=false --is-protected=false"
-      glance image-create --name=$pure_qcow2_name --file=$1 --disk-format=qcow2 \
+      glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
                           --container-format=bare --is-public=false --is-protected=false
 }
 
@@ -141,7 +143,7 @@ then
     if [ $md5value = $qcow2_md5 ]
     then
         echo $md5value
-    	create_image $qcow2_name $source_file $uname
+    	create_image $qcow2_name $source_file $uname $sw_image_name
         # md5 validate passed
         # create image file on openstack
 

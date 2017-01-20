@@ -19,7 +19,7 @@ from django.contrib import admin
 
 urlpatterns = [
     # http://135.251.216.181/, This is an homepage
-    url(r'^$','mgw7510.views.index' ),
+    url(r'^$','mgw7510.views.index'),
 
     # http://135.251.216.181/under-consturction/
     url(r'^under-construction/$','mgw7510.views.under_con'),

@@ -7,6 +7,7 @@
 
 # arguments:
 # $1 ==> uname_dir
+# $2 ==> sheet_name
 
 # return results:
 # 3 ====> did not find supported yact version, please use
@@ -15,6 +16,7 @@
 
 # uname_dir ==> Xiao.A.Xu_alcatel-sbell.com.cn
 uname_dir=$1
+sheet_name=$2
 
 # usage:
 # ./make_yaml_script.sh Xiao.A.Xu_alcatel-sbell.com.cn
@@ -107,12 +109,12 @@ cd $yact_tool_dir
 ################# step5: replace user_upload_dir csar
 cd $user_upload_dir && unzip -o *.csar.zip && rm -rf *.csar.zip
 
-cd ${yact_work_dir}"/ne-xxx/bulk/" && cp * ${user_upload_dir}/*.csar/bulk-config
-cd ${yact_work_dir}"/ne-xxx/deployment/" && cp *.yaml ${user_upload_dir}/*.csar/scripts/cloud_config/
+cd ${yact_work_dir}"/${sheet_name}/bulk/" && cp * ${user_upload_dir}/*.csar/bulk-config
+cd ${yact_work_dir}"/${sheet_name}/deployment/" && cp *.yaml ${user_upload_dir}/*.csar/scripts/cloud_config/
 
 
-#cp -r ${yact_work_dir}"/ne-xxx/bulk/*" ./bulk-config/
-#cp -r ${yact_work_dir}"/ne-xxx/deployment/*.yaml" ./scripts/cloud_config/
+#cp -r ${yact_work_dir}"/${sheet_name}/bulk/*" ./bulk-config/
+#cp -r ${yact_work_dir}"/${sheet_name}/deployment/*.yaml" ./scripts/cloud_config/
 
 # change to UserUploadDir and clean old YACT files
 #cd ../UserWorkDir/$uname_dir/ce_deploy_dir/UserUploadDir && rm -rf YACT/
