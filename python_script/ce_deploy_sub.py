@@ -461,13 +461,114 @@ def upload_qcow2_to_seed_create_image(user, seedvm_info, select_pak, uname_dir):
 
 
 def make_yaml_scripts(uname_dir):
+    try:
+        shell_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/make_yaml_script.sh"
 
-    shell_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/make_yaml_script.sh"
-
-    shell_cmd = "sh " + shell_file_path + " " + uname_dir
-    output = commands.getstatusoutput(shell_cmd)
-    logging.info('\n%s\n' % output[1])
-    if output[0] != 0:
-        logging.error('\nmake yaml and script failed\n' % key)
+        shell_cmd = shell_file_path + " " + uname_dir
+        output = commands.getstatusoutput(shell_cmd)
+        logging.info('\n%s\n' % output[1])
+        if output[0] != 0:
+            raise Exception("\nmake yaml and script failed \n")
+        return True
+    except Exception, e:
+        logging.error('\nproblem during make yaml & script: %s \n' % str(e))
         return False
-    return True
+
+
+def create_stack(seedvm_info):
+    try:
+        seedvm_ip = seedvm_info["ip"]
+        seedvm_username = seedvm_info["username"]
+        seedvm_passwd = seedvm_info["passwd"]
+        seedvm_prompt = seedvm_info["prompt"]
+        seedvm_openrc = seedvm_info["openrc"]
+
+        seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
+
+        seedvm_user_dir = seedvm_info["userdir"]
+
+        # create user dir on seedvm if not exist
+        # if exist, clean the content
+        seedvm_session.sendline("mkdir " + seedvm_user_dir)
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        seedvm_session.sendline("cd " + seedvm_user_dir + " && " + "rm -rf " + " * ")
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        # # for debug close
+        # seedvm_cmd = "scp -r " + WEB_SERVER_USERNAME + "@" + WEB_SERVER_IP + ":" + \
+        #               user_upload_dir + "/nokia*.csar " + seedvm_work_dir
+        #
+        # logging.info('\n%s \n' % seedvm_cmd4)
+        #
+        # seedvm_session.sendline(seedvm_cmd4)
+        # seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword:', 'connecting (yes/no)?'], timeout=300)
+        #
+        # if seedvm_ret == 0:
+        #     raise Exception("\nscp to webserver timeout \n")
+        # elif seedvm_ret == 1:
+        #     seedvm_session.sendline(WEB_SERVER_PASSWORD)
+        # elif seedvm_ret == 2:
+        #     logging.info('\n%s \n' % seedvm_session.before)
+        #     seedvm_session.sendline("yes")
+        #     seedvm_ret = seedvm_session.expect([pexpect.TIMEOUT, '[p|P]assword'], timeout=300)
+        #     if seedvm_ret == 0:
+        #         raise Exception("\nscp to webserver timeout \n")
+        #     elif seedvm_ret == 1:
+        #         logging.info('\n%s \n' % seedvm_session.before)
+        #         seedvm_session.sendline(WEB_SERVER_PASSWORD)
+        #
+        # seedvm_session.expect(seedvm_prompt, timeout=300)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # user_found.progressBarData = "86"
+        # user_found.save()
+        #
+        # ##### step6: generate hot and env files
+        # logging.info('\nStep6: generate hot and env files \n')
+        #
+        # seedvm_session.sendline("cd " + seedvm_work_dir + "/nokia*.csar/scripts")
+        # seedvm_session.expect(seedvm_prompt)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # # ./template.py -a deploy -r cloud_config/cloud-resource-data.yaml
+        # seedvm_session.sendline("./template.py -a deploy -r cloud_config/cloud-resource-data.yaml")
+        # seedvm_session.expect(seedvm_prompt)
+        #
+        # # get heat create command
+        # cmd_result = seedvm_session.before
+        # logging.info('\n%s \n' % cmd_result)
+        # cmd_result = re.findall(r'heat.*\r', cmd_result)
+        # create_heat_cmd = cmd_result[0].strip('\r')
+        # logging.info('\n%s \n' % create_heat_cmd)
+        #
+        # ##### step7: create 7510 stack
+        # seedvm_session.sendline("source " + user_found.seedVMOpenrcAbsPath)
+        # seedvm_session.expect(seedvm_prompt)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # logging.info('\nStep7: create 7510 stack \n')
+        # seedvm_session.sendline(create_heat_cmd)
+        # seedvm_session.expect(seedvm_prompt, timeout=300)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # # for debug close
+        #
+        # # TBD
+        # # # ##### step8: generate particular file "UUID.TXT"
+        # # logging.info('\nStep8: generate particular file UUID.TXT \n')
+        # #
+        # # ##### step9: put needed files to v7510
+        # # logging.info('\nStep9: put needed files to v7510 \n')
+        # #
+        # # ##### step10: run instal script on v7510
+        # # logging.info('\nStep10: run instal script on v7510 \n')
+
+    except Exception, e:
+        logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
+        return False
+
+
+

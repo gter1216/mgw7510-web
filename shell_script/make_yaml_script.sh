@@ -21,9 +21,11 @@ uname_dir=$1
 
 ################# Global Var    #######################
 # shell_dir = /home/projects/mgw7510_webserver/R01/shell_script
-shell_dir=`pwd`
+shell_dir="$( cd "$( dirname "$0"  )" && pwd  )"
+echo "shell script dir is: "${shell_dir}
 # home_dir = /home/projects/mgw7510_webserver/R01/
-home_dir=$(dirname "$PWD")
+home_dir=$( dirname "${shell_dir}" )
+echo "home dir is: "${home_dir}
 user_upload_dir="${home_dir}/UserWorkDir/${uname_dir}/ce_deploy_dir/UserUploadDir"
 yact_tool_dir="${home_dir}/YACT"
 yact_work_dir="${home_dir}/YACT/UserDir/${uname_dir}"
