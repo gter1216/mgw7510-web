@@ -618,7 +618,7 @@ def create_stack(seedvm_info, user_upload_dir, system_name):
             seedvm_session.expect(seedvm_prompt)
             logging.info('\n%s \n' % seedvm_session.before)
 
-            time.sleep(30)
+            time.sleep(60)
 
             seedvm_list_cmd = "heat stack-list "
             seedvm_session.sendline(seedvm_list_cmd)
