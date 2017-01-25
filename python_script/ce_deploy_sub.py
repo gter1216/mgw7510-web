@@ -531,6 +531,26 @@ def make_yaml_scripts(uname_dir, sheet_name):
 #     while()
 
 
+def check_stack_delete_status(seedvm_session, seedvm_prompt, system_name, timeout):
+    t0 = time.time()
+
+    seedvm_list_cmd = "heat stack-list "
+
+    while True:
+        if time.time() - t0 > timeout:
+            break
+        seedvm_session.sendline(seedvm_list_cmd)
+        seedvm_session.expect(seedvm_prompt)
+        list_result = seedvm_session.before
+
+        if re.findall(system_name, list_result) is []:
+            return True
+
+        time.sleep(5)
+
+    logging.error('\nthere is still an existed same name stack after delete, failed\n')
+    return False
+
 
 def create_stack(seedvm_info, user_upload_dir, system_name):
     try:
@@ -618,16 +638,9 @@ def create_stack(seedvm_info, user_upload_dir, system_name):
             seedvm_session.expect(seedvm_prompt)
             logging.info('\n%s \n' % seedvm_session.before)
 
-            time.sleep(60)
-
-            seedvm_list_cmd = "heat stack-list "
-            seedvm_session.sendline(seedvm_list_cmd)
-            seedvm_session.expect(seedvm_prompt)
-            list_result = seedvm_session.before
-
-            if re.findall(system_name, list_result) != []:
-                logging.error('\nthere is still an existed same name stack after delete, failed\n')
-                return False
+            if check_stack_delete_status(
+                    seedvm_session, seedvm_prompt, system_name, timeout=120) is not True:
+                raise Exception("\nthere is still an existed same name stack, failed \n")
 
         seedvm_session.sendline(create_heat_cmd)
         seedvm_session.expect(seedvm_prompt, timeout=300)
