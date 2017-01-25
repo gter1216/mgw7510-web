@@ -72,6 +72,11 @@ cd $dif_fill_tool_path
 python dif_fill.py -i input-dif.xlsm -u *.xlsx -o output.xlsm
 
 
+###################################################
+./yact.sh svc start
+   sleep 2s
+###################################################
+
 ################# step3: check current version 
 cd $yact_tool_dir
 # C710.B00.ae1a3116

@@ -51,6 +51,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
                    'passwd': user_found.seedVMPasswd,
                    'prompt': '#',
                    'openrc': user_found.seedVMOpenrcAbsPath,
+                   'keypath': user_found.seedVMKeypairAbsPath,
                    'userdir': SEEDVM_WORK_DIR + "/" + uname_dir}
 
     yact_server_info = {'ip': user_found.yactServerIp,
@@ -62,6 +63,13 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     qcow2_cached_seedvm_flag = False
     qcow2_cached_webserver_flag = False
+
+    # ================ clean all the files under user_dir/ce_deploy_dir/UserUploadDir
+    # ================ remove all old files in UserUploadDir
+    user_upload_dir = work_dir + "/UserUploadDir"
+    if os.path.isdir(user_upload_dir):
+        shutil.rmtree(user_upload_dir)
+        os.mkdir(user_upload_dir)
 
     # ================ initial log file ====================================
 
@@ -92,13 +100,13 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     logging.info('\nuser uploaded file "%s" is ready to use \n\n' % user_input_file_name)
 
-    handle_user_input_result = ce_deploy_sub.handle_user_input(user_input_target, uname_dir)
+    parse_user_input_result = ce_deploy_sub.handle_user_input(user_input_target, uname_dir)
 
-    if handle_user_input_result is None:
+    if parse_user_input_result is None:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
         return
 
-    (sheet_name, system_name, sw_image_name) = handle_user_input_result
+    (sheet_name, system_name, sw_image_name, scm_ex_ip1, scm_ex_ip2, scm_oam_ip) = parse_user_input_result
 
     # ================ Environment Pre-Check Start =================
     logging.info('\nStep0: Environment Check Start!\n')
@@ -227,7 +235,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
     logging.info('\nStep6: start to upload csar to seedvm\n')
 
     create_stack_result = ce_deploy_sub.create_stack(
-        seedvm_info, user_upload_dir, system_name)
+        seedvm_info, user_upload_dir, system_name, scm_ex_ip1, scm_ex_ip2, scm_oam_ip)
 
     if create_stack_result is False:
         ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")

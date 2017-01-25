@@ -123,6 +123,38 @@ def update_progbar_by_scp(user, session, prompt, timer, progbar_total_incr):
     logging.info('\n%s \n' % session.before)
 
 
+def get_system_name(ws, j_row, i_col):
+    for j in range(j_row, j_row+10):
+        for i in range(i_col, i_col+10):
+            data = str(ws.cell(row=j, column=i).value).strip()
+            if data == "System Name":
+                return str(ws.cell(row=j + 1, column=i).value).strip()
+
+
+def get_sw_image(ws, j_row, i_col):
+    for j in range(j_row, j_row+10):
+        for i in range(i_col, i_col+10):
+            data = str(ws.cell(row=j, column=i).value).strip()
+            if data == "sw-image":
+                return str(ws.cell(row=j, column=i + 2).value).strip(), j, i+2
+
+
+def get_scm_ex_ip(ws, j_row, i_col):
+    for j in range(j_row, j_row+10):
+        for i in range(i_col, i_col+10):
+            data = str(ws.cell(row=j, column=i).value).strip()
+            if data == "IPv4 Fixed IP1":
+                return str(ws.cell(row=j+1, column=i).value).strip(), str(ws.cell(row=j+1, column=i+1).value).strip()
+
+
+def get_scm_ip(ws, j_row, i_col):
+    for j in range(j_row, j_row+10):
+        for i in range(i_col, i_col+10):
+            data = str(ws.cell(row=j, column=i).value).strip()
+            if data == "SCM OAM":
+                return str(ws.cell(row=j, column=i + 2).value).strip()
+
+
 def handle_user_input(filename, uname_dir):
     try:
         sheet_name = None
@@ -131,6 +163,9 @@ def handle_user_input(filename, uname_dir):
         sw_image_col = None
         current_sw_image_name = None
         new_sw_image_name = None
+        scm_ex_ip1 = None
+        scm_ex_ip2 = None
+        scm_oam_ip = None
 
         wb = load_workbook(filename)
         sheets = wb.get_sheet_names()
@@ -141,15 +176,17 @@ def handle_user_input(filename, uname_dir):
         ws = wb.get_sheet_by_name(sheet_name)
 
         for i in range(2, 10):
-            for j in range(9, 30):
+            for j in range(9, 300):
                 data = str(ws.cell(row=j, column=i).value).strip()
-                if data == "System Name":
-                    system_name = str(ws.cell(row=j + 1, column=i).value).strip()
+                if data == "System Parameters":
+                    system_name = get_system_name(ws, j, i)
+                elif data == "Deploy General Parameters":
+                    (current_sw_image_name, sw_image_row, sw_image_col) = get_sw_image(ws, j, i)
+                elif data == "Deploy External IP Parameters":
+                    (scm_ex_ip1, scm_ex_ip2) = get_scm_ex_ip(ws, j, i)
+                elif data == "IPv4 Interface":
+                    scm_oam_ip = get_scm_ip(ws, j, i)
                     break
-                if data == "sw-image":
-                    current_sw_image_name = str(ws.cell(row=j, column=i + 2).value).strip()
-                    sw_image_row = j
-                    sw_image_col = i + 2
             else:
                 continue
             break
@@ -157,18 +194,23 @@ def handle_user_input(filename, uname_dir):
         logging.info('\nsheet name is %s \n' % sheet_name)
         logging.info('\nsystem name is %s \n' % system_name)
         logging.info('\ncurrent sw image name is %s \n' % current_sw_image_name)
+        logging.info('\ncurrent scm ext ip1 is %s \n' % scm_ex_ip1)
+        logging.info('\ncurrent scm ext ip2 is %s \n' % scm_ex_ip2)
+        logging.info('\ncurrent scm oam ip is %s \n' % scm_oam_ip)
 
         if system_name is None:
             raise Exception("\nsystem name is None \n")
         elif sw_image_row is None or sw_image_col is None:
             raise Exception("\ncurrent sw image is None \n")
+        elif scm_ex_ip1 is None or scm_ex_ip2 is None or scm_oam_ip is None:
+            raise Exception("\nscm ip is None\n")
 
         new_sw_image_name = current_sw_image_name + "_auto_" + uname_dir
         ws.cell(row=sw_image_row, column=sw_image_col).value = new_sw_image_name
         wb.save(filename)
 
         logging.info('\nnew sw image name is %s \n' % new_sw_image_name)
-        return sheet_name, system_name, new_sw_image_name
+        return sheet_name, system_name, new_sw_image_name, scm_ex_ip1, scm_ex_ip2, scm_oam_ip
 
     except Exception, e:
         logging.error('\nproblem during handle user input file: %s \n' % str(e))
@@ -537,28 +579,61 @@ def check_stack_delete_status(seedvm_session, seedvm_prompt, system_name, timeou
     seedvm_list_cmd = "heat stack-list "
 
     while True:
-        if time.time() - t0 > timeout:
-            break
         seedvm_session.sendline(seedvm_list_cmd)
         seedvm_session.expect(seedvm_prompt)
         list_result = seedvm_session.before
 
-        if re.findall(system_name, list_result) is []:
+        logging.info('\n%s \n' % list_result)
+
+        if re.findall(system_name, list_result) == []:
             return True
+
+        if time.time() - t0 > timeout:
+            break
 
         time.sleep(5)
 
-    logging.error('\nthere is still an existed same name stack after delete, failed\n')
     return False
 
 
-def create_stack(seedvm_info, user_upload_dir, system_name):
+def check_stack_final_result(seedvm_session, seedvm_prompt, system_name, timeout):
+    t0 = time.time()
+    cmd = "heat stack-list"
+
+    while True:
+        seedvm_session.sendline(cmd)
+        seedvm_session.expect(seedvm_prompt)
+        result = seedvm_session.before
+        logging.info('\n%s \n' % result)
+        result = result.split()
+        index = result.index(system_name)
+        create_state = result[index+2]
+        if create_state == "CREATE_COMPLETE":
+            return True
+        elif create_state == "CREATE_FAILED":
+            break
+        if time.time() - t0 > timeout:
+            break
+        time.sleep(10)
+
+    return False
+
+
+def create_stack(
+        seedvm_info,
+        user_upload_dir,
+        system_name,
+        scm_ex_ip1,
+        scm_ex_ip2,
+        scm_oam_ip):
+
     try:
         seedvm_ip = seedvm_info["ip"]
         seedvm_username = seedvm_info["username"]
         seedvm_passwd = seedvm_info["passwd"]
         seedvm_prompt = seedvm_info["prompt"]
         seedvm_openrc = seedvm_info["openrc"]
+        seedvm_keypath = seedvm_info["keypath"]
 
         seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
 
@@ -607,6 +682,7 @@ def create_stack(seedvm_info, user_upload_dir, system_name):
         seedvm_session.expect(seedvm_prompt)
         logging.info('\n%s \n' % seedvm_session.before)
 
+        # ========================================================================== debug tmp close
         # ./template.py -a deploy -r cloud_config/cloud-resource-data.yaml
         seedvm_session.sendline("./template.py -a deploy -r cloud_config/cloud-resource-data.yaml")
         seedvm_session.expect(seedvm_prompt)
@@ -660,16 +736,78 @@ def create_stack(seedvm_info, user_upload_dir, system_name):
             return False
 
         # check stack create final result by "heat stack-list | grep system_name"
-        check_stack_final_result(seedvm_session, seedvm_prompt, system_name)
+        if check_stack_final_result(seedvm_session, seedvm_prompt, system_name, timeout=240) is not True:
+            raise Exception("\nfinal create stack result is not CREATE_COMPLETE \n")
+        # ========================================================== debug tmp close
 
         # ======= step9: generate particular file "UUID.TXT"
         logging.info('\nStep9: generate particular file UUID.TXT \n')
+        seedvm_cmd = "./stack.py -a get-uuid -s " + system_name + " -o ../bulk-config/UUID.TXT"
+        seedvm_session.sendline(seedvm_cmd)
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
 
         # ======= step10: put needed files to v7510
         logging.info('\nStep10: put needed files to v7510 \n')
 
+        seedvm_session.sendline("cd ../bulk-config")
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        prompt = "\$"
+
+        cmd = "scp -i " + seedvm_keypath + " * " + "cloud-user@" + scm_ex_ip1 + ":/opt/v7510/data/"
+        child = pexpect.spawn(cmd)
+        ret = child.expect([pexpect.TIMEOUT, 'Are you sure you want to continue connecting'], timeout=120)
+        if ret == 0:
+            raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
+        elif ret == 1:
+            child.sendline("yes")
+            child.expect(prompt, timeout=20)
+            logging.info('\n%s \n' % child.before)
+        child.close()
+
+        cmd = "scp -i " + seedvm_keypath + " * " + "cloud-user@" + scm_ex_ip2 + ":/opt/v7510/data/"
+        child = pexpect.spawn(cmd)
+        ret = child.expect([pexpect.TIMEOUT, 'Are you sure you want to continue connecting'], timeout=120)
+        if ret == 0:
+            raise Exception("\nscp to %s timeout \n" % scm_ex_ip2)
+        elif ret == 1:
+            child.sendline("yes")
+            child.expect(prompt, timeout=20)
+            logging.info('\n%s \n' % child.before)
+        child.close()
+
         # ======= step11: run instal script on v7510
         logging.info('\nStep11: run instal script on v7510 \n')
+
+        cmd = "ssh -i " + seedvm_keypath + " cloud-user@" + scm_ex_ip1
+        child2 = pexpect.spawn(cmd)
+        child2.expect(prompt, timeout=20)
+        logging.info('\n%s \n' % child2.before)
+
+        child2.sendline("su root")
+        ret = child2.expect([pexpect.TIMEOUT, 'Password:'], timeout=20)
+        if ret == 0:
+            raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
+        elif ret == 1:
+            child2.sendline("-assured")
+            child2.expect("#")
+            logging.info('\n%s \n' % child2.before)
+
+        child2.sendline("node-console -s 10")
+        child2.sendline("\n")
+        ret = child2.expect([pexpect.TIMEOUT, "Login:"], timeout=20)
+        if ret == 0:
+            raise Exception("\nnode-console -s 10 timeout \n")
+        elif ret == 1:
+            child2.sendline("diag")
+            child2.expect("Password:")
+            child2.sendline("-assured")
+            child2.expect("#")
+            logging.info('\n%s \n' % child2.before)
+
+        # child2.sendline("run script INSTALL.SCR")
 
     except Exception, e:
         logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
