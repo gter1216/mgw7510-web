@@ -682,7 +682,6 @@ def create_stack(
         seedvm_session.expect(seedvm_prompt)
         logging.info('\n%s \n' % seedvm_session.before)
 
-        # ========================================================================== debug tmp close
         # ./template.py -a deploy -r cloud_config/cloud-resource-data.yaml
         seedvm_session.sendline("./template.py -a deploy -r cloud_config/cloud-resource-data.yaml")
         seedvm_session.expect(seedvm_prompt)
@@ -736,15 +735,15 @@ def create_stack(
             return False
 
         # check stack create final result by "heat stack-list | grep system_name"
-        if check_stack_final_result(seedvm_session, seedvm_prompt, system_name, timeout=240) is not True:
+        if check_stack_final_result(seedvm_session, seedvm_prompt, system_name, timeout=360) is not True:
             raise Exception("\nfinal create stack result is not CREATE_COMPLETE \n")
-        # ========================================================== debug tmp close
+
 
         # ======= step9: generate particular file "UUID.TXT"
         logging.info('\nStep9: generate particular file UUID.TXT \n')
         seedvm_cmd = "./stack.py -a get-uuid -s " + system_name + " -o ../bulk-config/UUID.TXT"
         seedvm_session.sendline(seedvm_cmd)
-        seedvm_session.expect(seedvm_prompt)
+        seedvm_session.expect(seedvm_prompt, timeout=5)
         logging.info('\n%s \n' % seedvm_session.before)
 
         # ======= step10: put needed files to v7510
@@ -754,60 +753,119 @@ def create_stack(
         seedvm_session.expect(seedvm_prompt)
         logging.info('\n%s \n' % seedvm_session.before)
 
-        prompt = "\$"
+        seedvm_session.sendline("rm -rf ~/.ssh/known_hosts")
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
 
         cmd = "scp -i " + seedvm_keypath + " * " + "cloud-user@" + scm_ex_ip1 + ":/opt/v7510/data/"
-        child = pexpect.spawn(cmd)
-        ret = child.expect([pexpect.TIMEOUT, 'Are you sure you want to continue connecting'], timeout=120)
+        logging.info('\n%s \n' % cmd)
+        seedvm_session.sendline(cmd)
+        ret = seedvm_session.expect([pexpect.TIMEOUT,
+                                     'Are you sure you want to continue connecting',
+                                     seedvm_prompt],
+                                    timeout=200)
         if ret == 0:
-            raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
+            logging.info('\n%s \n' % seedvm_session.before)
+            raise Exception("\nscp to %s timeout \n" % scm_ex_ip1)
         elif ret == 1:
-            child.sendline("yes")
-            child.expect(prompt, timeout=20)
-            logging.info('\n%s \n' % child.before)
-        child.close()
+            seedvm_session.sendline("yes")
+            seedvm_session.expect(seedvm_prompt, timeout=20)
+            logging.info('\n%s \n' % seedvm_session.before)
+        elif ret == 2:
+            logging.info('\n%s \n' % seedvm_session.before)
+        elif ret == 3:
+            logging.info('\n%s \n' % seedvm_session.before)
 
         cmd = "scp -i " + seedvm_keypath + " * " + "cloud-user@" + scm_ex_ip2 + ":/opt/v7510/data/"
-        child = pexpect.spawn(cmd)
-        ret = child.expect([pexpect.TIMEOUT, 'Are you sure you want to continue connecting'], timeout=120)
+        logging.info('\n%s \n' % cmd)
+        seedvm_session.sendline(cmd)
+        ret = seedvm_session.expect([pexpect.TIMEOUT,
+                                     'Are you sure you want to continue connecting',
+                                     seedvm_prompt],
+                                    timeout=200)
         if ret == 0:
+            logging.info('\n%s \n' % seedvm_session.before)
             raise Exception("\nscp to %s timeout \n" % scm_ex_ip2)
         elif ret == 1:
-            child.sendline("yes")
-            child.expect(prompt, timeout=20)
-            logging.info('\n%s \n' % child.before)
-        child.close()
+            seedvm_session.sendline("yes")
+            seedvm_session.expect(seedvm_prompt, timeout=20)
+            logging.info('\n%s \n' % seedvm_session.before)
+        elif ret == 2:
+            logging.info('\n%s \n' % seedvm_session.before)
 
         # ======= step11: run instal script on v7510
         logging.info('\nStep11: run instal script on v7510 \n')
 
-        cmd = "ssh -i " + seedvm_keypath + " cloud-user@" + scm_ex_ip1
-        child2 = pexpect.spawn(cmd)
-        child2.expect(prompt, timeout=20)
-        logging.info('\n%s \n' % child2.before)
+        prompt = "\$"
 
-        child2.sendline("su root")
-        ret = child2.expect([pexpect.TIMEOUT, 'Password:'], timeout=20)
+        cmd = "ssh -i " + seedvm_keypath + " cloud-user@" + scm_ex_ip1
+        seedvm_session.sendline(cmd)
+        seedvm_session.expect(prompt, timeout=20)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        seedvm_session.sendline("su root")
+        ret = seedvm_session.expect([pexpect.TIMEOUT, 'Password:'], timeout=20)
         if ret == 0:
             raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
         elif ret == 1:
-            child2.sendline("-assured")
-            child2.expect("#")
-            logging.info('\n%s \n' % child2.before)
+            seedvm_session.sendline("-assured")
+            seedvm_session.expect("#")
+            logging.info('\n%s \n' % seedvm_session.before)
 
-        child2.sendline("node-console -s 10")
-        child2.sendline("\n")
-        ret = child2.expect([pexpect.TIMEOUT, "Login:"], timeout=20)
+        seedvm_session.sendline("node-console -s 10")
+        seedvm_session.sendline("\n")
+        ret = seedvm_session.expect([pexpect.TIMEOUT, "Login:", "vMGx#"], timeout=20)
         if ret == 0:
             raise Exception("\nnode-console -s 10 timeout \n")
         elif ret == 1:
-            child2.sendline("diag")
-            child2.expect("Password:")
-            child2.sendline("-assured")
-            child2.expect("#")
-            logging.info('\n%s \n' % child2.before)
+            seedvm_session.sendline("diag")
+            seedvm_session.expect("Password:")
+            seedvm_session.sendline("-assured")
+            seedvm_session.expect("vMGx#")
+            logging.info('\n%s \n' % seedvm_session.before)
+        elif ret == 2:
+            logging.info('\n%s \n' % seedvm_session.before)
 
-        # child2.sendline("run script INSTALL.SCR")
+        seedvm_session.sendline("run script INSTALL0.SCR")
+        seedvm_session.expect("vMGx#", timeout=120)
+        result = seedvm_session.before
+        logging.info('\n%s \n' % result)
+        seedvm_session.close()
+
+        # login to active scm board to run left script
+        logging.info('\nStep12: login to active scm board to run left script \n')
+        seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
+
+        new_prompt = "vMGx#"
+        cmd = "ssh " + "diag@" + scm_oam_ip
+        seedvm_session.sendline(cmd)
+        ret = seedvm_session.expect([pexpect.TIMEOUT, 'password:', 'Are you sure you want to continue connecting'],
+                                    timeout=240)
+        if ret == 0:
+            raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
+        elif ret == 1:
+            seedvm_session.sendline("-assured")
+            seedvm_session.expect(new_prompt)
+        elif ret == 2:
+            seedvm_session.sendline("yes")
+            ret = seedvm_session.expect([pexpect.TIMEOUT, 'password'], timeout=20)
+            if ret == 0:
+                raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
+            elif ret == 1:
+                seedvm_session.sendline("-assured")
+                seedvm_session.expect(new_prompt)
+        seedvm_session.expect(new_prompt, timeout=20)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        seedvm_session.sendline("run script INSTALL.SCR")
+        seedvm_session.expect(new_prompt, timeout=60)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        seedvm_session.sendline("run script BULK.SCRR")
+        seedvm_session.expect(new_prompt, timeout=60)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        seedvm_session.close()
 
     except Exception, e:
         logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
