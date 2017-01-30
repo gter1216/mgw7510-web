@@ -12,7 +12,7 @@
 	                           这样看起来更像是原生的 APP 应用 -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-		<title>Nokia MGW 7510 Auto Deployment!</title>
+		<title>Nokia SBC Auto Deployment!</title>
 
 
         <link rel="stylesheet" href="/static/css/bootstrap2.min.css" />
@@ -44,7 +44,7 @@
 			<div class="container-fluid">
 				<div class="navbar-header navbar-left">
 					<a class=navbar-brand href="/">
-						Nokia MGW 7510 Auto Deployment
+						Nokia SBC Auto Deployment
 					</a>
 					<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
 						<span class="icon-bar"></span>
@@ -73,10 +73,10 @@
 		<div style="height: 80px;"></div>
 
 
-        <div class="container-fluid">
+        <div class="container-non-responsive">
             <div class="row">
-                <div class="col-lg-8">
-                    <h4>Settings</h4>
+                <div class="col-xs-8">
+                    <h4 style="margin-left: 2%">Settings</h4>
                     <hr/>
                 </div>
             </div>
@@ -97,8 +97,8 @@
                             <form id="cpForm" method="post" class="form-horizontal" action="/change-password/ok/">
                                 <div class="alert alert-success" style="display: none;"></div>
                                 <div class="form-group">
-                                    <label class="col-lg-3 control-label" style="font-weight: 300">UserName(Email address)</label>
-                                    <div class="col-lg-4">
+                                    <label class="col-xs-3 control-label" style="font-weight: 300">UserName(Email address)</label>
+                                    <div class="col-xs-4">
                                         <input type="text" class="form-control" name="username" id="cpUsername" value={{user}}>
                                     </div>
                                 </div>
@@ -106,15 +106,15 @@
                                 <div style="height: 5px;"></div>
 
                                 <div class="form-group">
-                                    <label class="col-lg-3 control-label" style="font-weight: 300">Old Password</label>
-                                    <div class="col-lg-4">
+                                    <label class="col-xs-3 control-label" style="font-weight: 300">Old Password</label>
+                                    <div class="col-xs-4">
                                         <input type="password" class="form-control" name="password" autocomplete="off" />
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-lg-3 control-label" style="font-weight: 300">New Password</label>
-                                    <div class="col-lg-4">
+                                    <label class="col-xs-3 control-label" style="font-weight: 300">New Password</label>
+                                    <div class="col-xs-4">
                                         <input type="password" class="form-control" name="newPassword" autocomplete="off" />
                                     </div>
                                 </div>
@@ -122,8 +122,8 @@
                                 <div style="height: 5px;"></div>
 
                                 <div class="form-group">
-                                    <label class="col-lg-3 control-label" style="font-weight: 300">Confirm New Password</label>
-                                    <div class="col-lg-4">
+                                    <label class="col-xs-3 control-label" style="font-weight: 300">Confirm New Password</label>
+                                    <div class="col-xs-4">
                                         <input type="password" class="form-control" name="confirmNewPassword" autocomplete="off" />
                                     </div>
                                 </div>
@@ -131,7 +131,7 @@
                                 <div style="height: 5px;"></div>
 
                                 <div class="form-group">
-                                    <div class="col-lg-4 col-lg-offset-3">
+                                    <div class="col-xs-4 col-xs-offset-3">
                                         <button type="submit" class="btn btn-primary btn-block">submit</button>
                                     </div>
                                 </div>
@@ -244,7 +244,7 @@
 						Xiao.A.Xu@alcatel-sbell.com.cn
 					</a>
 					<br>
-						Copyright © 2016  Nokia.inc All Rights Reserved
+						Copyright © 2016  Nokia.Inc All Rights Reserved
 					</br>
 				</br>
         </div>

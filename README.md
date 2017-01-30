@@ -5,19 +5,11 @@ The function of the web tool including but not limited to:
 
 1. SBC deployment for version: HE; CE; iSBC-RMS; iSBC-CLOUD VMware; iSCB-CLOUD Openstack
 2. Knowledge search
-3. DIF TOOL
-
-3. No content will be displayed on the log
-
-4. when click stop button, should kill the ongoing process and wait 2 seconds to get the log
 
 
 ####################   ROAD MAP  ##############################
-1. First test multiuser concurrence, then introduce AD4 system to replace new user register. 
-2. Download user cache
-3. Add download user input file function
-4. cancel browser page cache when click back button
-5. Initial Environment Check before start
+1. Add download user input function
+2. Finish install scripts on V7510 stack. 
 
 
 
