@@ -64,5 +64,9 @@ class WebUser(models.Model):
                                    blank=True,
                                    max_length=10)
 
+    ceDeployProcess = models.CharField(null=True,
+                                       blank=True,
+                                       max_length=100)
+
     def __unicode__(self):
         return self.username

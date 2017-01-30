@@ -42,6 +42,7 @@ class WebUserForm(ModelForm):
     ceDeployState = forms.CharField(required=False)
     ceSelectRel = forms.CharField(required=False)
     ceSelectPak = forms.CharField(required=False)
+    ceDeployProcess = forms.CharField(required=False)
 
     class Meta:
         model = WebUser  # inherit form WebUser

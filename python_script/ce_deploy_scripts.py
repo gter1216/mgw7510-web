@@ -31,6 +31,11 @@ SEEDVM_CACHE_dIR = SEEDVM_WORK_DIR + "/cache_dir"
 YACT_COMMON_TOOL_USER_DIR = BASE_DIR + "/YACT/UserDir"
 
 
+def stop_ce_deployment(uname):
+    pass
+    # delete image
+
+
 def start_ce_deployment(uname, select_rel, select_pak):
 
     # ================ global var inital ================================
@@ -66,10 +71,10 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     # ================ clean all the files under user_dir/ce_deploy_dir/UserUploadDir
     # ================ remove all old files in UserUploadDir
-    # user_upload_dir = work_dir + "/UserUploadDir"
-    # if os.path.isdir(user_upload_dir):
-    #     shutil.rmtree(user_upload_dir)
-    #     os.mkdir(user_upload_dir)
+    user_upload_dir = work_dir + "/UserUploadDir"
+    if os.path.isdir(user_upload_dir):
+        shutil.rmtree(user_upload_dir)
+        os.mkdir(user_upload_dir)
 
     # ================ initial log file ====================================
 
@@ -220,16 +225,16 @@ def start_ce_deployment(uname, select_rel, select_pak):
         logging.info('\nStep4: cached qcow2 found on seedvm, create image successful\n')
 
     # ================ make yaml and scripts, replace csar =================
-    # logging.info('\nStep5: make yaml and scripts start\n')
-    #
-    # make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir, sheet_name)
-    #
-    # if make_yaml_result is False:
-    #     ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
-    #     return
-    #
-    # ce_deploy_sub.update_progress_bar(user_found, "85")
-    # logging.info('\n make yaml and scripts successful\n')
+    logging.info('\nStep5: make yaml and scripts start\n')
+
+    make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir, sheet_name)
+
+    if make_yaml_result is False:
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        return
+
+    ce_deploy_sub.update_progress_bar(user_found, "85")
+    logging.info('\n make yaml and scripts successful\n')
 
     # ================ replaced csar is ready, upload to seedvm =============
     logging.info('\nStep6: start to upload csar to seedvm\n')

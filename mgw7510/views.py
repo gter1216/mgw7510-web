@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.core.mail import send_mail
 from python_script import ce_deploy_scripts
 from python_script import ce_deploy_sub
+from multiprocessing import Process
 import shutil
 import time
 import json
@@ -398,6 +399,20 @@ def updateProgress(request):
         return HttpResponse(progress)
 
 
+def ce_deploy_start_worker(uname, select_rel, select_pak):
+    user_found = WebUser.objects.get(username=uname)
+    pid_num = os.getpid()
+    user_found.ceDeployProcess = pid_num
+    user_found.save()
+    print "process is start, the pid is: "
+    print pid_num
+    ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
+
+
+def ce_deploy_stop_worker(uname):
+    ce_deploy_scripts.stop_ce_deployment(uname)
+
+
 def ceDeoployStart(request):
     if request.method == 'POST':
         uname = request.session.get('username')
@@ -416,19 +431,34 @@ def ceDeoployStart(request):
         user_found.ceDeployState = "ongoing"
         user_found.ceSelectRel = select_rel
         user_found.ceSelectPak = select_pak
-        user_found.save()
 
         if uname:
-            ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
+            p = Process(target=ce_deploy_start_worker, args=(uname, select_rel, select_pak))
+            p.start()
+            p.join()
 
         return HttpResponse("ok")
+
 
 def ceDeoployStop(request):
     if request.method == 'GET':
         uname = request.session.get('username')
         user_found = WebUser.objects.get(username=uname)
+
+        pid_num = user_found.ceDeployProcess
+
+        print "ongoing process pid is: "
+        print pid_num
+
+        os.system("kill -9 %s" % pid_num)
+
+        print "process is killed "
+
         user_found.ceDeployState = "stopped"
         user_found.save()
+
+        ce_deploy_stop_worker(uname)
+
         return HttpResponse("ok")
 
 

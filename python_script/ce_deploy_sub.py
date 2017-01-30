@@ -320,6 +320,7 @@ def get_seedvm_qcow2_cached_flag_and_create_image(uname_dir, seedvm_info, qcow2_
         seedvm_cmd = "sh /root/seedvm_cache_check.sh " + "/root/auto_ce_deploy " + qcow2_name + " " + \
                      qcow2_md5 + " " + ce_deploy_scripts.SEEDVM_DISK_LIMIT + " " + seedvm_info["openrc"] + \
                      " " + uname_dir + " " + sw_image_name
+        logging.info('\n%s \n' % seedvm_cmd)
         seedvm_session.sendline(seedvm_cmd)
         seedvm_session.expect(seedvm_prompt, timeout=200)
         logging.info('\n%s \n' % seedvm_session.before)
@@ -353,6 +354,9 @@ def get_seedvm_qcow2_cached_flag_and_create_image(uname_dir, seedvm_info, qcow2_
         elif exitcode == 4:
             logging.info('\nfind cached qcow2 on seedvm \n')
             return True
+        elif exitcode == 5:
+            logging.error('\ncreate image timeout, please check! \n')
+            return None
         else:
             logging.error('\nunkown error \n')
             return None
@@ -441,8 +445,10 @@ def download_files_to_webserver(user, pak_server_info, select_rel, select_pak, u
 
             # download csar and qcow2 successfull
             # move qcow2 from buffer dir to cache dir
-            shutil.move(ce_deploy_scripts.BUFFER_DIR + "/" + select_pak,
-                        ce_deploy_scripts.CACHE_DIR + "/" + select_pak)
+            cmd = "mv -f " + ce_deploy_scripts.BUFFER_DIR + "/" + select_pak + " " + \
+                  ce_deploy_scripts.CACHE_DIR
+            logging.info('\n%s \n' % cmd)
+            os.system(cmd)
 
         pak_cmd_csar = "scp -r " + "*M_O*csar.zip yact-C* yact-nokia-mgw* " + ce_deploy_scripts.WEB_SERVER_USERNAME + "@" + \
                        ce_deploy_scripts.WEB_SERVER_IP + ":" + user_upload_dir
@@ -514,6 +520,13 @@ def upload_qcow2_to_seed_create_image(user, seedvm_info, select_pak, sw_image_na
                               timer=0.1,
                               progbar_total_incr=35)
 
+        logging.info('\nmove qcow2 from buffer to cache, on seedvm \n')
+        move_cmd = "mv -f " + ce_deploy_scripts.SEEDVM_BUFFER_dIR + "/" + select_pak + " " + ce_deploy_scripts.SEEDVM_CACHE_dIR + "/" + select_pak
+        logging.info('\n%s \n' % move_cmd)
+        seedvm_session.sendline(move_cmd)
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+
         # ================= Create Image
         logging.info('\ncreate image \n')
         seedvm_session.sendline("cd " + ce_deploy_scripts.SEEDVM_BUFFER_dIR)
@@ -536,14 +549,6 @@ def upload_qcow2_to_seed_create_image(user, seedvm_info, select_pak, sw_image_na
             raise Exception("\ncreate glance image failed \n")
         elif seedvm_ret == 1:
             logging.info('\n%s \n' % seedvm_session.before)
-
-        logging.info('\nmove qcow2 from buffer to cache, on seedvm \n')
-        move_cmd = "mv " + ce_deploy_scripts.SEEDVM_BUFFER_dIR + "/" + select_pak + \
-                   " " + ce_deploy_scripts.SEEDVM_CACHE_dIR + "/" + select_pak
-        logging.info('\n%s \n' % move_cmd)
-        seedvm_session.sendline(move_cmd)
-        seedvm_session.expect(seedvm_prompt)
-        logging.info('\n%s \n' % seedvm_session.before)
 
         logging.info('\ncreate glance image successful \n')
         seedvm_session.close()
@@ -793,77 +798,81 @@ def create_stack(
         elif ret == 2:
             logging.info('\n%s \n' % seedvm_session.before)
 
-        # ======= step11: run instal script on v7510
-        logging.info('\nStep11: run instal script on v7510 \n')
+        # ==============================================================================
+        # scripts running on V7510 TBD
+        # ==============================================================================
 
-        prompt = "\$"
-
-        cmd = "ssh -i " + seedvm_keypath + " cloud-user@" + scm_ex_ip1
-        seedvm_session.sendline(cmd)
-        seedvm_session.expect(prompt, timeout=20)
-        logging.info('\n%s \n' % seedvm_session.before)
-
-        seedvm_session.sendline("su root")
-        ret = seedvm_session.expect([pexpect.TIMEOUT, 'Password:'], timeout=20)
-        if ret == 0:
-            raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
-        elif ret == 1:
-            seedvm_session.sendline("-assured")
-            seedvm_session.expect("#")
-            logging.info('\n%s \n' % seedvm_session.before)
-
-        seedvm_session.sendline("node-console -s 10")
-        seedvm_session.sendline("\n")
-        ret = seedvm_session.expect([pexpect.TIMEOUT, "Login:", "vMGx#"], timeout=20)
-        if ret == 0:
-            raise Exception("\nnode-console -s 10 timeout \n")
-        elif ret == 1:
-            seedvm_session.sendline("diag")
-            seedvm_session.expect("Password:")
-            seedvm_session.sendline("-assured")
-            seedvm_session.expect("vMGx#")
-            logging.info('\n%s \n' % seedvm_session.before)
-        elif ret == 2:
-            logging.info('\n%s \n' % seedvm_session.before)
-
-        seedvm_session.sendline("run script INSTALL0.SCR")
-        seedvm_session.expect("vMGx#", timeout=120)
-        result = seedvm_session.before
-        logging.info('\n%s \n' % result)
-        seedvm_session.close()
-
-        # login to active scm board to run left script
-        logging.info('\nStep12: login to active scm board to run left script \n')
-        seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
-
-        new_prompt = "vMGx#"
-        cmd = "ssh " + "diag@" + scm_oam_ip
-        seedvm_session.sendline(cmd)
-        ret = seedvm_session.expect([pexpect.TIMEOUT, 'password:', 'Are you sure you want to continue connecting'],
-                                    timeout=240)
-        if ret == 0:
-            raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
-        elif ret == 1:
-            seedvm_session.sendline("-assured")
-            seedvm_session.expect(new_prompt)
-        elif ret == 2:
-            seedvm_session.sendline("yes")
-            ret = seedvm_session.expect([pexpect.TIMEOUT, 'password'], timeout=20)
-            if ret == 0:
-                raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
-            elif ret == 1:
-                seedvm_session.sendline("-assured")
-                seedvm_session.expect(new_prompt)
-        seedvm_session.expect(new_prompt, timeout=20)
-        logging.info('\n%s \n' % seedvm_session.before)
-
-        seedvm_session.sendline("run script INSTALL.SCR")
-        seedvm_session.expect(new_prompt, timeout=60)
-        logging.info('\n%s \n' % seedvm_session.before)
-
-        seedvm_session.sendline("run script BULK.SCRR")
-        seedvm_session.expect(new_prompt, timeout=60)
-        logging.info('\n%s \n' % seedvm_session.before)
+        # # ======= step11: run instal script on v7510
+        # logging.info('\nStep11: run instal script on v7510 \n')
+        #
+        # prompt = "\$"
+        #
+        # cmd = "ssh -i " + seedvm_keypath + " cloud-user@" + scm_ex_ip1
+        # seedvm_session.sendline(cmd)
+        # seedvm_session.expect(prompt, timeout=20)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # seedvm_session.sendline("su root")
+        # ret = seedvm_session.expect([pexpect.TIMEOUT, 'Password:'], timeout=20)
+        # if ret == 0:
+        #     raise Exception("\nssh to %s timeout \n" % scm_ex_ip1)
+        # elif ret == 1:
+        #     seedvm_session.sendline("-assured")
+        #     seedvm_session.expect("#")
+        #     logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # seedvm_session.sendline("node-console -s 10")
+        # seedvm_session.sendline("\n")
+        # ret = seedvm_session.expect([pexpect.TIMEOUT, "Login:", "vMGx#"], timeout=20)
+        # if ret == 0:
+        #     raise Exception("\nnode-console -s 10 timeout \n")
+        # elif ret == 1:
+        #     seedvm_session.sendline("diag")
+        #     seedvm_session.expect("Password:")
+        #     seedvm_session.sendline("-assured")
+        #     seedvm_session.expect("vMGx#")
+        #     logging.info('\n%s \n' % seedvm_session.before)
+        # elif ret == 2:
+        #     logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # seedvm_session.sendline("run script INSTALL0.SCR")
+        # seedvm_session.expect("vMGx#", timeout=120)
+        # result = seedvm_session.before
+        # logging.info('\n%s \n' % result)
+        # seedvm_session.close()
+        #
+        # # login to active scm board to run left script
+        # logging.info('\nStep12: login to active scm board to run left script \n')
+        # seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
+        #
+        # new_prompt = "vMGx#"
+        # cmd = "ssh " + "diag@" + scm_oam_ip
+        # seedvm_session.sendline(cmd)
+        # ret = seedvm_session.expect([pexpect.TIMEOUT, 'password:', 'Are you sure you want to continue connecting'],
+        #                             timeout=240)
+        # if ret == 0:
+        #     raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
+        # elif ret == 1:
+        #     seedvm_session.sendline("-assured")
+        #     seedvm_session.expect(new_prompt)
+        # elif ret == 2:
+        #     seedvm_session.sendline("yes")
+        #     ret = seedvm_session.expect([pexpect.TIMEOUT, 'password'], timeout=20)
+        #     if ret == 0:
+        #         raise Exception("\nssh to %s timeout \n" % scm_oam_ip)
+        #     elif ret == 1:
+        #         seedvm_session.sendline("-assured")
+        #         seedvm_session.expect(new_prompt)
+        # seedvm_session.expect(new_prompt, timeout=20)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # seedvm_session.sendline("run script INSTALL.SCR")
+        # seedvm_session.expect(new_prompt, timeout=60)
+        # logging.info('\n%s \n' % seedvm_session.before)
+        #
+        # seedvm_session.sendline("run script BULK.SCRR")
+        # seedvm_session.expect(new_prompt, timeout=60)
+        # logging.info('\n%s \n' % seedvm_session.before)
 
         seedvm_session.close()
 

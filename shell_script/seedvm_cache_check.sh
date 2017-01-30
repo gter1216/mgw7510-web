@@ -24,6 +24,7 @@
 # 2 ====> error occurred, no enough disk storage;
 # 3 ====> cached qcow2 find and create image failed
 # 4 ====> cached qcow2 find and create image success
+# 5 ====> create image timeout
 
 work_dir=$1
 qcow2_name=$2
@@ -72,10 +73,12 @@ create_image(){
       uname_local=$3
       #pure_qcow2_name=${qcow2_name_local%.*}"_auto_"${uname_local}
       sw_image_name=$1
-      echo "glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
+      echo "timeout 10s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
             --container-format=bare --is-public=false --is-protected=false"
-      glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
+      # if create image not finished in 10s, then kill it and return 124
+      timeout 10s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
                           --container-format=bare --is-public=false --is-protected=false
+      #return $?
 }
 
 clean_outdated_qcow2(){
@@ -146,9 +149,14 @@ then
     	create_image $qcow2_name $source_file $uname $sw_image_name
         # md5 validate passed
         # create image file on openstack
-
-        if [ $? != 0 ]
+        cm_result=$?
+        if [ $cm_result -ne 0 ]
         then
+           if [ $cm_result -eq 124 ]
+           then
+              # create image timeout
+              exit 5
+           fi
        	   # create image failed
        	   exit 3
        	else
