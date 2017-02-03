@@ -19,7 +19,7 @@ uname_dir=$1
 sheet_name=$2
 
 # usage:
-# ./make_yaml_script.sh Xiao.A.Xu_alcatel-sbell.com.cn
+# ./make_yaml_script.sh Xiao.A.Xu_alcatel-sbell.com.cn ne-xxx
 
 ################# Global Var    #######################
 # shell_dir = /home/projects/mgw7510_webserver/R01/shell_script
@@ -64,21 +64,20 @@ dif_fill_tool_path="${yact_work_dir}/DIF_TOOLS/DIF_FILL/7510-CE/$version"
 
 # unzip yact*.zip
 cd $yact_work_dir && unzip yact*.zip && rm -rf yact*.zip
+
 mv *.xlsx $dif_fill_tool_path
 
 
 ################# step2: generate output dif file
 cd $dif_fill_tool_path
+rm -rf user-input.xlsx
 python dif_fill.py -i input-dif.xlsm -u *.xlsx -o output.xlsm
-
-
-###################################################
-./yact.sh svc start
-   sleep 2s
-###################################################
 
 ################# step3: check current version 
 cd $yact_tool_dir
+./yact.sh svc start
+sleep 2s
+
 # C710.B00.ae1a3116
 supported_version=`./yact.sh list version 7510-CE`
 echo "current supported version is: "$supported_version

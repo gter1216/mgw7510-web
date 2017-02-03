@@ -73,10 +73,10 @@ create_image(){
       uname_local=$3
       #pure_qcow2_name=${qcow2_name_local%.*}"_auto_"${uname_local}
       sw_image_name=$1
-      echo "timeout 10s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
+      echo "timeout 30s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
             --container-format=bare --is-public=false --is-protected=false"
       # if create image not finished in 10s, then kill it and return 124
-      timeout 10s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
+      timeout 30s glance image-create --name=$4 --file=$1 --disk-format=qcow2 \
                           --container-format=bare --is-public=false --is-protected=false
       #return $?
 }

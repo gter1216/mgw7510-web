@@ -31,9 +31,21 @@ SEEDVM_CACHE_dIR = SEEDVM_WORK_DIR + "/cache_dir"
 YACT_COMMON_TOOL_USER_DIR = BASE_DIR + "/YACT/UserDir"
 
 
-def stop_ce_deployment(uname):
-    pass
+def stop_ce_deployment(uname, image_name):
+    user_found = WebUser.objects.get(username=uname)
+
+    uname_dir = user_found.tmpPath
+
+    seedvm_info = {'ip': user_found.seedVMIp,
+                   'username': user_found.seedVMUsername,
+                   'passwd': user_found.seedVMPasswd,
+                   'prompt': '#',
+                   'openrc': user_found.seedVMOpenrcAbsPath,
+                   'keypath': user_found.seedVMKeypairAbsPath,
+                   'userdir': SEEDVM_WORK_DIR + "/" + uname_dir}
+
     # delete image
+    ce_deploy_sub.delete_image(seedvm_info, image_name)
 
 
 def start_ce_deployment(uname, select_rel, select_pak):
@@ -113,6 +125,9 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     (sheet_name, system_name, sw_image_name, scm_ex_ip1, scm_ex_ip2, scm_oam_ip) = parse_user_input_result
 
+    user_found.swImageName = sw_image_name
+    user_found.save()
+
     # ================ Environment Pre-Check Start =================
     logging.info('\nStep0: Environment Check Start!\n')
 
@@ -142,21 +157,21 @@ def start_ce_deployment(uname, select_rel, select_pak):
 
     if not qcow2_md5:
         # failed to get md5 on pak, ssh problem.
-        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
         return
 
     qcow2_cached_seedvm_flag = ce_deploy_sub.get_seedvm_qcow2_cached_flag_and_create_image(
         uname_dir, seedvm_info, select_pak, qcow2_md5, sw_image_name)
 
     if qcow2_cached_seedvm_flag is None:
-        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
         return
     elif qcow2_cached_seedvm_flag is not True:
         logging.info('\nStep2: check cached qcow2 on webserver!\n')
         # there is no cached qcow2 on seedvm, check if cached qcow2 exists on web server
         qcow2_cached_webserver_flag = ce_deploy_sub.get_webserver_qcow2_cached_flag(select_pak, qcow2_md5)
         if qcow2_cached_webserver_flag is None:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
     ce_deploy_sub.update_progress_bar(user_found, "5")
@@ -171,7 +186,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
         download_result = ce_deploy_sub.download_files_to_webserver(
             user_found, pak_server_info, select_rel, select_pak, user_upload_dir, True)
         if download_result is False:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
         ce_deploy_sub.update_progress_bar(user_found, "45")
@@ -183,7 +198,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
             user_found, seedvm_info, select_pak, sw_image_name)
 
         if upload_result is False:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
     elif (qcow2_cached_seedvm_flag is False) and \
@@ -195,7 +210,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
             user_found, pak_server_info, select_rel, select_pak, user_upload_dir, False)
 
         if download_result is False:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
         ce_deploy_sub.update_progress_bar(user_found, "45")
@@ -206,7 +221,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
             user_found, seedvm_info, select_pak, uname_dir)
 
         if upload_result is False:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
     elif qcow2_cached_seedvm_flag is True:
@@ -217,7 +232,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
             user_found, pak_server_info, select_rel, select_pak, user_upload_dir, False)
 
         if download_result is False:
-            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+            ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
             return
 
         # image created success
@@ -230,7 +245,7 @@ def start_ce_deployment(uname, select_rel, select_pak):
     make_yaml_result = ce_deploy_sub.make_yaml_scripts(uname_dir, sheet_name)
 
     if make_yaml_result is False:
-        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
         return
 
     ce_deploy_sub.update_progress_bar(user_found, "85")
@@ -243,11 +258,11 @@ def start_ce_deployment(uname, select_rel, select_pak):
         seedvm_info, user_upload_dir, system_name, scm_ex_ip1, scm_ex_ip2, scm_oam_ip)
 
     if create_stack_result is False:
-        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="no")
+        ce_deploy_sub.deployment_failed(user_found, perform_clean_work="yes")
         return
 
     # ================ all work finished ==================================
-    ce_deploy_sub.deployment_success(user_found, perform_clean_work="no")
+    ce_deploy_sub.deployment_success(user_found, perform_clean_work="yes")
     return
 
 # clear log_file

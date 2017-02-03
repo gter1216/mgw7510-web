@@ -40,7 +40,16 @@ def update_progress_bar(user, data):
 
 
 def clean_work(user):
-    pass
+    if user.swImageName:
+        uname_dir = user.tmpPath
+        seedvm_info = {'ip': user.seedVMIp,
+                       'username': user.seedVMUsername,
+                       'passwd': user.seedVMPasswd,
+                       'prompt': '#',
+                       'openrc': user.seedVMOpenrcAbsPath,
+                       'keypath': user.seedVMKeypairAbsPath,
+                       'userdir': ce_deploy_scripts.SEEDVM_WORK_DIR + "/" + uname_dir}
+        delete_image(seedvm_info, user.swImageName)
 
 
 def deployment_success(user, perform_clean_work):
@@ -49,6 +58,8 @@ def deployment_success(user, perform_clean_work):
         clean_work(user)
 
     update_progress_bar(user, "100")
+
+    logging.info('\nDeployment Successful! Remember to install scripts on V7510! \n')
 
     # shutdown logger
     logging.shutdown()
@@ -479,6 +490,35 @@ def download_files_to_webserver(user, pak_server_info, select_rel, select_pak, u
         return False
 
 
+def delete_image(seedvm_info, sw_image_name):
+    try:
+        seedvm_ip = seedvm_info["ip"]
+        seedvm_username = seedvm_info["username"]
+        seedvm_passwd = seedvm_info["passwd"]
+        seedvm_prompt = seedvm_info["prompt"]
+        seedvm_openrc = seedvm_info["openrc"]
+
+        seedvm_session = create_ssh_session(seedvm_ip, seedvm_username, seedvm_passwd, seedvm_prompt)
+        logging.info('\ndelete image \n')
+
+        seedvm_session.sendline("source " + seedvm_openrc)
+        seedvm_session.expect(seedvm_prompt)
+        logging.info('\n%s \n' % seedvm_session.before)
+
+        delete_glance_cmd = "glance image-delete " + sw_image_name
+        logging.info('\n%s \n' % delete_glance_cmd)
+        seedvm_session.sendline(delete_glance_cmd)
+        seedvm_session.expect(seedvm_prompt, timeout=50)
+
+        logging.info('\ndelete glance image successful \n')
+        seedvm_session.close()
+        return True
+
+    except Exception, e:
+        logging.error('\nproblem during ssh to seedvm server: %s \n' % str(e))
+        return False
+
+
 def upload_qcow2_to_seed_create_image(user, seedvm_info, select_pak, sw_image_name):
     try:
         seedvm_ip = seedvm_info["ip"]
@@ -564,6 +604,9 @@ def make_yaml_scripts(uname_dir, sheet_name):
         shell_file_path = ce_deploy_scripts.BASE_DIR + "/shell_script/make_yaml_script.sh"
 
         shell_cmd = shell_file_path + " " + uname_dir + " " + sheet_name
+
+        logging.info('\n%s \n' % shell_cmd)
+
         output = commands.getstatusoutput(shell_cmd)
 
         logging.info('\n%s\n' % output[1])

@@ -44,6 +44,8 @@ class WebUserForm(ModelForm):
     ceSelectPak = forms.CharField(required=False)
     ceDeployProcess = forms.CharField(required=False)
 
+    swImageName = forms.CharField(required=False)
+
     class Meta:
         model = WebUser  # inherit form WebUser
         fields = '__all__'

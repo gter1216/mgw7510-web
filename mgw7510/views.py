@@ -334,6 +334,7 @@ def ceDeploy(request):
     else:
         return HttpResponse("please login in first!")
 
+
 # ce deploy process function
 def ceCheckPak(request):
     if request.method == 'POST':
@@ -367,6 +368,7 @@ def ceCheckPak(request):
         jstr = json.dumps(pak_list)
         return HttpResponse(jstr, content_type='application/json')
 
+
 def uploadFile(request):
     if request.method == 'POST':
         uname = request.session.get('username')
@@ -391,6 +393,7 @@ def uploadFile(request):
 
         return HttpResponse(jstr, content_type='application/json')
 
+
 def updateProgress(request):
     if request.method == 'GET':
         uname = request.session.get('username')
@@ -409,8 +412,8 @@ def ce_deploy_start_worker(uname, select_rel, select_pak):
     ce_deploy_scripts.start_ce_deployment(uname, select_rel, select_pak)
 
 
-def ce_deploy_stop_worker(uname):
-    ce_deploy_scripts.stop_ce_deployment(uname)
+def ce_deploy_stop_worker(uname, image_name):
+    ce_deploy_scripts.stop_ce_deployment(uname, image_name)
 
 
 def ceDeoployStart(request):
@@ -431,6 +434,7 @@ def ceDeoployStart(request):
         user_found.ceDeployState = "ongoing"
         user_found.ceSelectRel = select_rel
         user_found.ceSelectPak = select_pak
+        user_found.save()
 
         if uname:
             p = Process(target=ce_deploy_start_worker, args=(uname, select_rel, select_pak))
@@ -457,7 +461,8 @@ def ceDeoployStop(request):
         user_found.ceDeployState = "stopped"
         user_found.save()
 
-        ce_deploy_stop_worker(uname)
+        if user_found.swImageName:
+            ce_deploy_stop_worker(uname, user_found.swImageName)
 
         return HttpResponse("ok")
 
